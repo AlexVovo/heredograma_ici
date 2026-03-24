@@ -18,21 +18,21 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
   final idadeDiagController = TextEditingController();
 
   String sexo = 'M';
-  String parentesco = 'Pai';
+  String parentesco = 'pai';
   bool temCancer = false;
   String? tipoCancer;
 
   final List<String> parentescos = [
-    'Pai',
-    'Mãe',
-    'Irmão',
-    'Irmã',
-    'Avô',
-    'Avó',
-    'Tio',
-    'Tia',
-    'Filho',
-    'Filha'
+    'avo',
+    'ava',
+    'pai',
+    'mae',
+    'irmao',
+    'irma',
+    'tio',
+    'tia',
+    'filho',
+    'filha'
   ];
 
   final List<String> tiposCancer = [
@@ -88,7 +88,7 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
 
               // Parentesco
               DropdownButtonFormField(
-                value: parentesco,
+                initialValue: parentesco,
                 items: parentescos
                     .map((p) => DropdownMenuItem(value: p, child: Text(p)))
                     .toList(),
@@ -100,7 +100,7 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
 
               // Sexo
               DropdownButtonFormField(
-                value: sexo,
+                initialValue: sexo,
                 items: const [
                   DropdownMenuItem(value: 'M', child: Text('Masculino')),
                   DropdownMenuItem(value: 'F', child: Text('Feminino')),
@@ -131,7 +131,7 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
                 const SizedBox(height: 12),
 
                 DropdownButtonFormField(
-                  value: tipoCancer,
+                  initialValue: tipoCancer,
                   items: tiposCancer
                       .map((c) =>
                           DropdownMenuItem(value: c, child: Text(c)))

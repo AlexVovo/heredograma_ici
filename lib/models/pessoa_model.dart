@@ -1,4 +1,6 @@
 enum Parentesco {
+  avo,
+  ava,
   pai,
   mae,
   filho,

@@ -92,14 +92,40 @@ class _MyHomePageState extends State<MyHomePage> {
             return;
           }
 
-          // 🔥 CONVERTE Map → Pessoa
+          // 🔥 IDENTIFICA OS PAIS/MAES DISPONÍVEIS
+          Map<String, dynamic>? paiCadastrado;
+          Map<String, dynamic>? maeCadastrada;
+
+          for (var f in familiares) {
+            if (f['parentesco'] == 'pai' && paiCadastrado == null) {
+              paiCadastrado = f;
+            }
+            if (f['parentesco'] == 'mae' && maeCadastrada == null) {
+              maeCadastrada = f;
+            }
+          }
+
+          // 🔥 CONVERTE Map → Pessoa usando o ID real e vínculos de parentesco
           List<Pessoa> pessoas = familiares.map((f) {
+            final isFilho = f['parentesco'] == 'filho' || f['parentesco'] == 'filha';
+            final isIrmao = f['parentesco'] == 'irmao' || f['parentesco'] == 'irma';
+
+            String? paiId;
+            String? maeId;
+
+            if (isFilho || isIrmao) {
+              paiId = paiCadastrado != null ? paiCadastrado['id'] as String : null;
+              maeId = maeCadastrada != null ? maeCadastrada['id'] as String : null;
+            }
+
             return Pessoa(
-              id: DateTime.now().toString(),
+              id: f['id'] ?? DateTime.now().toString(),
               nome: f['nome'],
               sexo: f['sexo'],
               parentesco: f['parentesco'],
               temCancer: f['temCancer'],
+              paiId: paiId,
+              maeId: maeId,
             );
           }).toList();
 
