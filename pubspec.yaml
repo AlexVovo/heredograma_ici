@@ -1,15 +1,20 @@
 name: heredograma_ici
-description: "A new Flutter project."
+description: "App de construção de heredogramas"
 publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.10.4
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+
+  # Firebase
+  firebase_core: ^4.6.0
+  cloud_firestore: ^6.2.0
+  firebase_auth: ^6.3.0
 
   cupertino_icons: ^1.0.8
   uuid: ^4.5.3

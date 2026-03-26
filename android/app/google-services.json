@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "992579552722",
+    "project_id": "heredograma-ici-118b3",
+    "storage_bucket": "heredograma-ici-118b3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992579552722:android:9740b7b05813a35765f40b",
+        "android_client_info": {
+          "package_name": "com.example.heredograma_ici"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-gekiYjDrqI7uBxgKQqbRiDj2G4gBtdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
