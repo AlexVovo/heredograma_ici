@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:heredograma_ici/views/heredogramas_list_view.dart';
-import '../models/pessoa_model.dart';
-import 'heredograma_view.dart';
-import '../main.dart';
+import 'package:heredograma_ici/views/quiz_view.dart';
+import 'heredogramas_list_view.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -11,205 +9,215 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Heredograma'),
-        centerTitle: true,
+        title: const Text('Heredograma ICI'),
+        elevation: 0,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10),
-
-            // Header
-            const Row(
-              children: [
-                Icon(Icons.account_tree, size: 36),
-                SizedBox(width: 10),
-                Text(
-                  'Bem-vindo',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+            // Banner bem-vindo
+            Card(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    colors: [Colors.blue.shade400, Colors.blue.shade800],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Grid RESPONSIVO 🔥
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  int crossAxisCount = 2;
-
-                  if (constraints.maxWidth > 1000) {
-                    crossAxisCount = 4; // desktop grande
-                  } else if (constraints.maxWidth > 700) {
-                    crossAxisCount = 3; // tablet
-                  }
-
-                  return GridView.builder(
-                    itemCount: 4,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.5, // 👈 controla altura
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.account_tree,
+                          size: 40,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Bem-vindo',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              'Crie e gerencie seus heredogramas',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    itemBuilder: (context, index) {
-                      switch (index) {
-                        case 0:
-                          return _buildCard(
-                            context,
-                            icon: Icons.add,
-                            title: 'Criar',
-                            subtitle: 'Novo heredograma',
-                            color: Colors.blue,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const MyHomePage(),
-                                  //pessoas: [
-                                  //  Pessoa(
-                                  //  id: '1',
-                                  //nome: 'Pai',
-                                  //sexo: 'M',
-                                  //parentesco: Parentesco.pai.name,
-                                  //),
-                                  //],
-                                  //),
-                                ),
-                              );
-                            },
-                          );
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
 
-                        case 1:
-                          return _buildCard(
-                            context,
-                            icon: Icons.list,
-                            title: 'Listar',
-                            subtitle: 'Heredogramas salvos',
-                            color: Colors.green,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const HeredogramasListView(),
-                                ),
-                              );
-                            },
-                          );
+            // Seção de Ações Rápidas
+            const Text(
+              'Ações Rápidas',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
 
-                        case 2:
-                          return _buildCard(
-                            context,
-                            icon: Icons.visibility,
-                            title: 'Visualizar',
-                            subtitle: 'Herança genética',
-                            color: Colors.orange,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => HeredogramaView(
-                                    pessoas: [
-                                      // 👴 Avô
-                                      Pessoa(
-                                        id: '1',
-                                        nome: 'Avô',
-                                        sexo: 'M',
-                                        parentesco: Parentesco.pai.name,
-                                        temCancer: false,
-                                      ),
+            // Grid responsivo
+            LayoutBuilder(
+              builder: (context, constraints) {
+                int crossAxisCount = 2;
+                if (constraints.maxWidth > 700) {
+                  crossAxisCount = 4;
+                }
 
-                                      // 👵 Avó (caso inicial)
-                                      Pessoa(
-                                        id: '2',
-                                        nome: 'Avó',
-                                        sexo: 'F',
-                                        parentesco: Parentesco.mae.name,
-                                        temCancer: true,
-                                      ),
+                return GridView.count(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    _buildActionCard(
+                      context,
+                      icon: Icons.add_circle_outline,
+                      title: 'Novo',
+                      subtitle: 'Heredograma',
+                      color: Colors.blue,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Funcionalidade em desenvolvimento'),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      context,
+                      icon: Icons.list_alt_rounded,
+                      title: 'Listar',
+                      subtitle: 'Heredogramas',
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const HeredogramasListView(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      context,
+                      icon: Icons.quiz_outlined,
+                      title: 'Quiz',
+                      subtitle: 'Genética',
+                      color: Colors.orange,
+                      onTap: () {
+                        _mostrarQuizDemo(context);
+                      },
+                    ),
+                    _buildActionCard(
+                      context,
+                      icon: Icons.info_outline,
+                      title: 'Sobre',
+                      subtitle: 'App',
+                      color: Colors.purple,
+                      onTap: () {
+                        _mostrarSobre(context);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 24),
 
-                                      // 👨 Pai (filho da avó - possível portador)
-                                      Pessoa(
-                                        id: '3',
-                                        nome: 'Pai',
-                                        sexo: 'M',
-                                        parentesco: Parentesco.pai.name,
-                                        paiId: '1',
-                                        maeId: '2',
-                                        temCancer: false,
-                                      ),
+            // Seção de Informações
+            const Text(
+              'Informações',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
 
-                                      // 👩 Tia (irmã do pai - afetada)
-                                      Pessoa(
-                                        id: '4',
-                                        nome: 'Tia',
-                                        sexo: 'F',
-                                        parentesco: Parentesco.filha.name,
-                                        paiId: '1',
-                                        maeId: '2',
-                                        temCancer: true,
-                                      ),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'O que é um Heredograma?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Um heredograma (ou pedigree) é um diagrama que mostra a ocorrência de uma doença genética ou traço hereditário em uma família. Ele ajuda a visualizar padrões de herança e identificar indivíduos portadores de genes recessivos.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-                                      // 👩 Mãe (fora da linhagem genética)
-                                      Pessoa(
-                                        id: '5',
-                                        nome: 'Mãe',
-                                        sexo: 'F',
-                                        parentesco: Parentesco.mae.name,
-                                        temCancer: false,
-                                      ),
-
-                                      // 👦 Filho (não afetado)
-                                      Pessoa(
-                                        id: '6',
-                                        nome: 'Filho',
-                                        sexo: 'M',
-                                        parentesco: Parentesco.filho.name,
-                                        paiId: '3',
-                                        maeId: '5',
-                                        temCancer: false,
-                                      ),
-
-                                      // 👧 Filha (afetada - herança)
-                                      Pessoa(
-                                        id: '7',
-                                        nome: 'Filha',
-                                        sexo: 'F',
-                                        parentesco: Parentesco.filha.name,
-                                        paiId: '3',
-                                        maeId: '5',
-                                        temCancer: true,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        default:
-                          return _buildCard(
-                            context,
-                            icon: Icons.quiz,
-                            title: 'Quiz',
-                            subtitle: 'Em breve',
-                            color: Colors.purple,
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Em construção 🚧'),
-                                ),
-                              );
-                            },
-                          );
-                      }
-                    },
-                  );
-                },
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Como Usar?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildDica(
+                      '1.',
+                      'Clique em "Novo" para criar um novo heredograma',
+                    ),
+                    _buildDica(
+                      '2.',
+                      'Adicione os membros da família e suas informações',
+                    ),
+                    _buildDica(
+                      '3.',
+                      'Indique relações de parentesco e doenças',
+                    ),
+                    _buildDica(
+                      '4.',
+                      'Visualize e salve seu heredograma',
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -218,7 +226,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(
+  Widget _buildActionCard(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -226,37 +234,170 @@ class HomeView extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: color.withOpacity(0.2)),
+      child: Card(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: color.withValues(alpha: 0.1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 36, color: color),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
-        padding: const EdgeInsets.all(12), // 👈 menor padding
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 30, color: color), // 👈 menor ícone
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14, // 👈 menor texto
-                fontWeight: FontWeight.bold,
-                color: color,
+      ),
+    );
+  }
+
+  Widget _buildDica(String numero, String texto) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.blue[100],
+            ),
+            child: Center(
+              child: Text(
+                numero,
+                style: TextStyle(
+                  color: Colors.blue[700],
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(height: 4),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                texto,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _mostrarQuizDemo(BuildContext context) {
+    final perguntas = [
+      QuizPergunta(
+        id: '1',
+        titulo: 'O que é um gene dominante?',
+        descricao:
+            'Um gene que se expressa mesmo quando herdado de apenas um dos pais',
+        tipo: TipoPergunta.multiplaEscolha,
+        opcoes: [
+          'Um gene que sempre está ativo',
+          'Um gene que se expressa mesmo em dose única',
+          'Um gene raro na população',
+          'Um gene que causa doença',
+        ],
+        respostaCorreta: 'Um gene que se expressa mesmo em dose única',
+        explicacao:
+            'Genes dominantes se expressam mesmo quando herdados de apenas um dos pais.',
+      ),
+      QuizPergunta(
+        id: '2',
+        titulo: 'O câncer de mama hereditário está sempre presente?',
+        descricao:
+            'Se um membro da família tem câncer de mama hereditário, todos os portadores desenvolverão câncer?',
+        tipo: TipoPergunta.simNao,
+        opcoes: ['Sim', 'Não'],
+        respostaCorreta: false,
+        explicacao:
+            'Nem todos os portadores de mutações hereditárias desenvolvem a doença. Outros fatores ambientais influenciam.',
+      ),
+      QuizPergunta(
+        id: '3',
+        titulo: 'Como é a herança autossômica recessiva?',
+        descricao:
+            'Descreva brevemente como funciona a herança autossômica recessiva',
+        tipo: TipoPergunta.texto,
+        opcoes: [],
+        respostaCorreta:
+            'Precisa herdar duas cópias do gene mutante (uma de cada pai)',
+      ),
+    ];
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => QuizView(
+          titulo: 'Quiz de Genética',
+          descricao: 'Teste seus conhecimentos sobre hereditariedade',
+          perguntas: perguntas,
+        ),
+      ),
+    );
+  }
+
+  void _mostrarSobre(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sobre o App'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11),
+              'Heredograma ICI',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'App profissional para criação e gerenciamento de heredogramas.',
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Versão: 1.0.0',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            Text(
+              '© 2026 - Todos os direitos reservados',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
+          ),
+        ],
       ),
     );
   }
