@@ -75,13 +75,21 @@ class Heredograma {
       titulo: json['titulo'] ?? 'Sem título',
       descricao: json['descricao'],
       pessoas: pessoasList,
-      dataCriacao:
-          (json['dataCriacao'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      dataAtualizacao: (json['dataAtualizacao'] as Timestamp?)?.toDate(),
+      dataCriacao: _parseTimestamp(json['dataCriacao']),
+      dataAtualizacao: _parseTimestamp(json['dataAtualizacao']),
       pacienteNome: json['pacienteNome'] ?? '',
       pacienteIdade: json['pacienteIdade'],
       pacienteSexo: json['pacienteSexo'],
     );
+  }
+
+  static DateTime _parseTimestamp(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 
   // Copiar com mudanças

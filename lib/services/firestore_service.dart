@@ -37,8 +37,7 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) =>
-              Heredograma.fromJson(doc.id, doc.data() as Map<String, dynamic>))
+          .map((doc) => Heredograma.fromJson(doc.id, doc.data()))
           .toList();
     });
   }
@@ -87,12 +86,11 @@ class FirestoreService {
     return _db
         .collection(_collection)
         .where('pacienteNome',
-            isGreaterThanOrEqualTo: nome, isLessThan: nome + 'z')
+            isGreaterThanOrEqualTo: nome, isLessThan: '${nome}z')
         .snapshots()
         .map((snapshot) {
       return snapshot.docs
-          .map((doc) =>
-              Heredograma.fromJson(doc.id, doc.data() as Map<String, dynamic>))
+          .map((doc) => Heredograma.fromJson(doc.id, doc.data()))
           .toList();
     });
   }

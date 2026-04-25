@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
+import 'package:heredograma_ici/models/pessoa_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
+import 'family_member_form.dart';
 import 'heredograma_view.dart';
 
 class HeredogramaDetailView extends StatefulWidget {
@@ -24,7 +26,10 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
   late TextEditingController _pacienteIdadeController;
   late bool _isEditing;
   late String _pacienteSexo;
+  late List<Pessoa> _pessoas;
   final _service = FirestoreService();
+
+  bool get _isNew => widget.heredograma.id.isEmpty;
 
   @override
   void initState() {
@@ -38,6 +43,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
     _pacienteIdadeController = TextEditingController(
         text: widget.heredograma.pacienteIdade?.toString() ?? '');
     _pacienteSexo = widget.heredograma.pacienteSexo ?? 'M';
+    _pessoas = List<Pessoa>.from(widget.heredograma.pessoas);
   }
 
   @override
@@ -54,15 +60,27 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
       final heredogramaAtualizado = widget.heredograma.copyWith(
         titulo: _tituloController.text,
         descricao: _descricaoController.text,
+        pessoas: _pessoas,
         pacienteNome: _pacienteNomeController.text,
         pacienteIdade: int.tryParse(_pacienteIdadeController.text),
         pacienteSexo: _pacienteSexo,
       );
 
+      if (_isNew) {
+        await _service.criarHeredograma(heredogramaAtualizado);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Heredograma criado com sucesso')),
+        );
+        Navigator.pop(context);
+        return;
+      }
+
       await _service.atualizarHeredograma(
         widget.heredograma.id,
         heredogramaAtualizado,
       );
+      if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Heredograma atualizado com sucesso')),
@@ -76,11 +94,39 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
     }
   }
 
+  void _adicionarFamiliar() async {
+    final membro = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FamilyMemberForm(
+          onSave: (membro) {},
+        ),
+      ),
+    );
+
+    if (membro == null || !mounted) return;
+
+    setState(() {
+      _pessoas.add(
+        Pessoa(
+          id: membro['id'] as String,
+          nome: membro['nome'] as String,
+          sexo: membro['sexo'] as String,
+          parentesco: membro['parentesco'] as String,
+          temCancer: membro['temCancer'] as bool,
+          portador: false,
+          tipoCancer: membro['tipoCancer'] as String?,
+          idadeDiagnostico: membro['idadeDiagnostico'] as int?,
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalhes do Heredograma'),
+        title: Text(_isNew ? 'Novo Heredograma' : 'Detalhes do Heredograma'),
         actions: [
           if (!_isEditing)
             IconButton(
@@ -143,7 +189,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                     Expanded(
                       child: _isEditing
                           ? DropdownButtonFormField<String>(
-                              value: _pacienteSexo,
+                              initialValue: _pacienteSexo,
                               items: const [
                                 DropdownMenuItem(
                                   value: 'M',
@@ -186,9 +232,9 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
 
             // Seção de Familiares
             _buildSection(
-              title: 'Familiares (${widget.heredograma.pessoas.length})',
+              title: 'Familiares (${_pessoas.length})',
               children: [
-                if (widget.heredograma.pessoas.isEmpty)
+                if (_pessoas.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(16),
                     child: Center(
@@ -198,9 +244,9 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                 else
                   Column(
                     children: List.generate(
-                      widget.heredograma.pessoas.length,
+                      _pessoas.length,
                       (index) {
-                        final pessoa = widget.heredograma.pessoas[index];
+                        final pessoa = _pessoas[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 12),
                           padding: const EdgeInsets.all(12),
@@ -275,6 +321,15 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
             const SizedBox(height: 24),
 
             // Botões de ação
+            if (_isEditing)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: ElevatedButton.icon(
+                  onPressed: _adicionarFamiliar,
+                  icon: const Icon(Icons.person_add),
+                  label: const Text('Adicionar familiar'),
+                ),
+              ),
             Row(
               children: [
                 Expanded(
@@ -284,7 +339,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => HeredogramaView(
-                            pessoas: widget.heredograma.pessoas,
+                            pessoas: _pessoas,
                           ),
                         ),
                       );
@@ -299,7 +354,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                     child: ElevatedButton.icon(
                       onPressed: _salvarAlteracoes,
                       icon: const Icon(Icons.save),
-                      label: const Text('Salvar'),
+                      label: Text(_isNew ? 'Criar' : 'Salvar'),
                     ),
                   ),
               ],

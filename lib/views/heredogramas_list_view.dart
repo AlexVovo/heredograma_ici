@@ -55,6 +55,29 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
         title: const Text('Heredogramas Salvos'),
         elevation: 0,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => HeredogramaDetailView(
+                heredograma: Heredograma(
+                  id: '',
+                  titulo: '',
+                  descricao: '',
+                  pessoas: [],
+                  dataCriacao: DateTime.now(),
+                  pacienteNome: '',
+                  pacienteIdade: null,
+                  pacienteSexo: 'M',
+                ),
+                isEditing: true,
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           // Barra de busca

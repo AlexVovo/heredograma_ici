@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/views/quiz_view.dart';
+import 'package:heredograma_ici/views/heredograma_detail_view.dart';
 import 'heredogramas_list_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -100,9 +102,22 @@ class HomeView extends StatelessWidget {
                       subtitle: 'Heredograma',
                       color: Colors.blue,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Funcionalidade em desenvolvimento'),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HeredogramaDetailView(
+                              heredograma: Heredograma(
+                                id: '',
+                                titulo: '',
+                                descricao: '',
+                                pessoas: [],
+                                dataCriacao: DateTime.now(),
+                                pacienteNome: '',
+                                pacienteIdade: null,
+                                pacienteSexo: 'M',
+                              ),
+                              isEditing: true,
+                            ),
                           ),
                         );
                       },

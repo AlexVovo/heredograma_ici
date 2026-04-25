@@ -54,13 +54,12 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
         'idade': int.tryParse(idadeController.text),
         'temCancer': temCancer,
         'tipoCancer': tipoCancer,
-        'idadeDiagnostico': temCancer
-            ? int.tryParse(idadeDiagController.text)
-            : null,
+        'idadeDiagnostico':
+            temCancer ? int.tryParse(idadeDiagController.text) : null,
       };
 
       widget.onSave(membro);
-      Navigator.pop(context);
+      Navigator.pop(context, membro);
     }
   }
 
@@ -129,12 +128,10 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
 
               if (temCancer) ...[
                 const SizedBox(height: 12),
-
                 DropdownButtonFormField(
                   initialValue: tipoCancer,
                   items: tiposCancer
-                      .map((c) =>
-                          DropdownMenuItem(value: c, child: Text(c)))
+                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                       .toList(),
                   onChanged: (v) => setState(() => tipoCancer = v),
                   decoration:
@@ -142,14 +139,12 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
                   validator: (v) =>
                       temCancer && v == null ? 'Selecione o tipo' : null,
                 ),
-
                 const SizedBox(height: 12),
-
                 TextFormField(
                   controller: idadeDiagController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                      labelText: 'Idade no diagnóstico'),
+                  decoration:
+                      const InputDecoration(labelText: 'Idade no diagnóstico'),
                 ),
               ],
 
