@@ -249,7 +249,7 @@ class _HeredogramaViewState extends State<HeredogramaView> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.6),
+                  color: Colors.orange.withValues(alpha: 0.6),
                   shape: shape,
                 ),
               ),

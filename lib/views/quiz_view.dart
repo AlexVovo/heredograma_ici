@@ -290,7 +290,7 @@ class _QuizViewState extends State<QuizView> {
                     ),
                     borderRadius: BorderRadius.circular(8),
                     color: selecionada
-                        ? Colors.blue.withOpacity(0.1)
+                        ? Colors.blue.withValues(alpha: 0.1)
                         : Colors.white,
                   ),
                   padding: const EdgeInsets.all(16),

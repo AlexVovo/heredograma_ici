@@ -36,5 +36,6 @@ class Pessoa {
     this.tipoCancer,
     this.paiId,
     this.maeId,
+    this.conjugeId,
   });
 }

@@ -66,6 +66,7 @@ class Heredograma {
                   idadeDiagnostico: p['idadeDiagnostico'],
                   paiId: p['paiId'],
                   maeId: p['maeId'],
+                  conjugeId: p['conjugeId'],
                 ))
             .toList() ??
         [];
