@@ -108,33 +108,58 @@ class _HeredogramaViewState extends State<HeredogramaView> {
   }
 
   List<Widget> _buildNiveis() {
-    return [
-      _buildLinha(
-          'Avós',
-          widget.pessoas
-              .where((p) => p.parentesco == 'avo' || p.parentesco == 'ava')
-              .toList()),
-      _buildLinha(
-          'Pais',
-          widget.pessoas
-              .where((p) => p.parentesco == 'pai' || p.parentesco == 'mae')
-              .toList()),
-      _buildLinha(
-          'Filhos',
-          widget.pessoas
-              .where((p) => p.parentesco == 'filho' || p.parentesco == 'filha')
-              .toList()),
-      _buildLinha(
-          'Irmãos',
-          widget.pessoas
-              .where((p) => p.parentesco == 'irmao' || p.parentesco == 'irma')
-              .toList()),
-      _buildLinha(
-          'Tios',
-          widget.pessoas
-              .where((p) => p.parentesco == 'tia' || p.parentesco == 'tio')
-              .toList()),
+    // Níveis em ordem de cima para baixo
+    final niveis = [
+      {
+        'titulo': 'Avós',
+        'lista': widget.pessoas.where((p) => p.parentesco == 'avo' || p.parentesco == 'ava').toList(),
+      },
+      {
+        'titulo': 'Pais',
+        'lista': widget.pessoas.where((p) => p.parentesco == 'pai' || p.parentesco == 'mae').toList(),
+      },
+      {
+        'titulo': 'Filhos',
+        'lista': widget.pessoas.where((p) => p.parentesco == 'filho' || p.parentesco == 'filha').toList(),
+      },
+      {
+        'titulo': 'Irmãos',
+        'lista': widget.pessoas.where((p) => p.parentesco == 'irmao' || p.parentesco == 'irma').toList(),
+      },
+      {
+        'titulo': 'Tios',
+        'lista': widget.pessoas.where((p) => p.parentesco == 'tia' || p.parentesco == 'tio').toList(),
+      },
     ];
+
+    return niveis.map((nivel) {
+      return _buildLinhaArvore(nivel['titulo'] as String, nivel['lista'] as List<Pessoa>);
+    }).toList();
+  }
+
+  Widget _buildLinhaArvore(String titulo, List<Pessoa> lista) {
+    if (lista.isEmpty) return const SizedBox();
+
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        Text(
+          titulo,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.indigo[900],
+              ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: lista.map((p) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: _buildPessoaArvore(p),
+          )).toList(),
+        ),
+      ],
+    );
   }
 
   Widget _buildLinha(String titulo, List<Pessoa> lista) {
@@ -163,52 +188,86 @@ class _HeredogramaViewState extends State<HeredogramaView> {
 
   Widget _buildPessoa(Pessoa p) {
     _pessoaKeys.putIfAbsent(p.id, () => GlobalKey());
+    return _buildPessoaArvore(p);
+  }
 
+  Widget _buildPessoaArvore(Pessoa p) {
+    final isMale = p.sexo == 'M';
+    final shape = isMale ? BoxShape.rectangle : BoxShape.circle;
+    Color borderColor = Colors.green.shade700;
+    if (p.temCancer) {
+      borderColor = Colors.red.shade900;
+    } else if (p.portador) {
+      borderColor = Colors.orange;
+    }
     return Container(
       key: _pessoaKeys[p.id],
-      width: 95,
-      padding: const EdgeInsets.all(8),
+      width: 110,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha((0.08 * 255).round()),
-            blurRadius: 8,
+            color: Colors.black.withAlpha((0.10 * 255).round()),
+            blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: borderColor, width: 2),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _buildIconPessoa(p),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: shape,
+              color: p.temCancer ? Colors.black : Colors.white,
+              border: Border.all(color: borderColor, width: 2),
+            ),
+            child: Center(
+              child: Icon(
+                isMale ? Icons.male : Icons.female,
+                color: isMale ? Colors.blue[700] : Colors.green[700],
+                size: 28,
+              ),
+            ),
+          ),
           const SizedBox(height: 8),
-
           Text(
             p.nome,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-
-          // 🔥 Info clínica
           if (p.temCancer && p.tipoCancer != null)
-            Text(
-              '${p.tipoCancer} (${p.idadeDiagnostico ?? "-"})',
-              style: const TextStyle(fontSize: 10, color: Colors.red),
-              textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                '${p.tipoCancer} (${p.idadeDiagnostico ?? "-"})',
+                style: const TextStyle(fontSize: 10, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
             ),
-
           if (p.portador && !p.temCancer)
-            const Text(
-              'Portador',
-              style: TextStyle(fontSize: 10, color: Colors.orange),
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Text(
+                'Portador',
+                style: TextStyle(fontSize: 10, color: Colors.orange),
+              ),
             ),
-
-          Text(
-            p.parentesco,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              p.parentesco,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+            ),
           ),
         ],
       ),
