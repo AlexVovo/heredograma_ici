@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/models/pessoa_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
+import 'package:heredograma_ici/services/pdf_service.dart';
 import 'family_member_form.dart';
 import 'heredograma_view.dart';
 
@@ -28,6 +29,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
   late String _pacienteSexo;
   late List<Pessoa> _pessoas;
   final _service = FirestoreService();
+  final _pdfService = PdfService();
 
   bool get _isNew => widget.heredograma.id.isEmpty;
 
@@ -348,21 +350,58 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                     label: const Text('Visualizar'),
                   ),
                 ),
-                const SizedBox(width: 12),
-                if (_isEditing)
+                if (!_isNew) ...[
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _salvarAlteracoes,
-                      icon: const Icon(Icons.save),
-                      label: Text(_isNew ? 'Criar' : 'Salvar'),
+                    child: OutlinedButton.icon(
+                      onPressed: _gerarPdf,
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      label: const Text('Gerar PDF'),
                     ),
                   ),
+                ],
               ],
             ),
+            if (_isEditing) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _salvarAlteracoes,
+                  icon: const Icon(Icons.save),
+                  label: Text(_isNew ? 'Criar caso' : 'Salvar alterações'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _gerarPdf() async {
+    final heredogramaAtual = widget.heredograma.copyWith(
+      titulo: _tituloController.text,
+      descricao: _descricaoController.text,
+      pessoas: _pessoas,
+      pacienteNome: _pacienteNomeController.text,
+      pacienteIdade: int.tryParse(_pacienteIdadeController.text),
+      pacienteSexo: _pacienteSexo,
+    );
+
+    try {
+      final caminho = await _pdfService.gerarHeredograma(heredogramaAtual);
+      if (caminho != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF salvo em: $caminho')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao gerar PDF: $e')),
+      );
+    }
   }
 
   Widget _buildSection({

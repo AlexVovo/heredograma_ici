@@ -1,60 +1,68 @@
 import 'package:flutter/material.dart';
 
-// Modelos de Quiz
+import 'family_interview_field.dart';
+
 class QuizPergunta {
   final String id;
+  final String secao;
   final String titulo;
   final String descricao;
   final TipoPergunta tipo;
   final List<String> opcoes;
-  final dynamic respostaCorreta;
-  final String? explicacao;
+  final bool obrigatoria;
 
-  QuizPergunta({
+  const QuizPergunta({
     required this.id,
+    required this.secao,
     required this.titulo,
-    required this.descricao,
+    this.descricao = '',
     required this.tipo,
-    required this.opcoes,
-    required this.respostaCorreta,
-    this.explicacao,
+    this.opcoes = const [],
+    this.obrigatoria = false,
   });
 }
 
-enum TipoPergunta { multiplaEscolha, simNao, texto }
+enum TipoPergunta {
+  multiplaEscolha,
+  simNao,
+  simNaoDesconhecido,
+  texto,
+  textoLongo,
+  numero,
+  data,
+  familiares,
+}
 
 class QuizResultado {
   final int totalPerguntas;
-  final int acertos;
+  final int respondidas;
   final List<RespostaPergunta> respostas;
 
-  QuizResultado({
+  const QuizResultado({
     required this.totalPerguntas,
-    required this.acertos,
+    required this.respondidas,
     required this.respostas,
   });
 
-  double get percentual => (acertos / totalPerguntas * 100);
+  double get percentualPreenchido =>
+      totalPerguntas == 0 ? 0 : respondidas / totalPerguntas * 100;
 }
 
 class RespostaPergunta {
   final String perguntaId;
   final dynamic resposta;
-  final bool correta;
 
-  RespostaPergunta({
+  const RespostaPergunta({
     required this.perguntaId,
     required this.resposta,
-    required this.correta,
   });
 }
 
-// Quiz View
 class QuizView extends StatefulWidget {
   final String titulo;
   final String descricao;
   final List<QuizPergunta> perguntas;
-  final Function(QuizResultado)? onCompletar;
+  final Future<void> Function(QuizResultado)? onCompletar;
 
   const QuizView({
     super.key,
@@ -69,15 +77,16 @@ class QuizView extends StatefulWidget {
 }
 
 class _QuizViewState extends State<QuizView> {
-  late PageController _pageController;
+  late final PageController _pageController;
+  late final List<dynamic> _respostas;
   int _paginaAtual = 0;
-  late List<dynamic> _respostas;
+  bool _salvando = false;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
-    _respostas = List.filled(widget.perguntas.length, null);
+    _respostas = List<dynamic>.filled(widget.perguntas.length, null);
   }
 
   @override
@@ -86,7 +95,30 @@ class _QuizViewState extends State<QuizView> {
     super.dispose();
   }
 
+  bool _respostaPreenchida(int index) {
+    final resposta = _respostas[index];
+    if (resposta == null) return false;
+    if (resposta is String) return resposta.trim().isNotEmpty;
+    if (resposta is Iterable) return resposta.isNotEmpty;
+    if (resposta is Map) return resposta.isNotEmpty;
+    return true;
+  }
+
+  bool _validarPerguntaAtual() {
+    final pergunta = widget.perguntas[_paginaAtual];
+    if (!pergunta.obrigatoria || _respostaPreenchida(_paginaAtual)) {
+      return true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Preencha este campo obrigatório.')),
+    );
+    return false;
+  }
+
   void _proximaPagina() {
+    if (!_validarPerguntaAtual()) return;
+
     if (_paginaAtual < widget.perguntas.length - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -104,68 +136,65 @@ class _QuizViewState extends State<QuizView> {
     }
   }
 
-  void _finalizarQuiz() {
-    // Calcular resultado
-    int acertos = 0;
+  Future<void> _finalizarQuestionario() async {
+    if (!_validarPerguntaAtual()) return;
+
     final respostasDetalhadas = <RespostaPergunta>[];
+    var respondidas = 0;
 
-    for (int i = 0; i < widget.perguntas.length; i++) {
-      final pergunta = widget.perguntas[i];
-      final resposta = _respostas[i];
-      final correta = resposta == pergunta.respostaCorreta;
-
-      if (correta) acertos++;
-
+    for (var i = 0; i < widget.perguntas.length; i++) {
+      if (_respostaPreenchida(i)) respondidas++;
       respostasDetalhadas.add(
         RespostaPergunta(
-          perguntaId: pergunta.id,
-          resposta: resposta,
-          correta: correta,
+          perguntaId: widget.perguntas[i].id,
+          resposta: _respostas[i],
         ),
       );
     }
 
     final resultado = QuizResultado(
       totalPerguntas: widget.perguntas.length,
-      acertos: acertos,
+      respondidas: respondidas,
       respostas: respostasDetalhadas,
     );
 
-    widget.onCompletar?.call(resultado);
+    if (widget.onCompletar != null) {
+      setState(() => _salvando = true);
+      try {
+        await widget.onCompletar!(resultado);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Não foi possível salvar a entrevista: $e')),
+        );
+        setState(() => _salvando = false);
+        return;
+      }
+    }
 
-    // Mostrar resultado
+    if (!mounted) return;
+    setState(() => _salvando = false);
     _mostrarResultado(resultado);
   }
 
   void _mostrarResultado(QuizResultado resultado) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resultado do Quiz'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${resultado.acertos}/${resultado.totalPerguntas}',
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${resultado.percentual.toStringAsFixed(1)}%',
-              style: TextStyle(
-                fontSize: 20,
-                color: resultado.percentual >= 70 ? Colors.green : Colors.red,
-              ),
-            ),
-          ],
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.assignment_turned_in_outlined, size: 40),
+        title: const Text('Formulário concluído'),
+        content: Text(
+          '${resultado.respondidas} de ${resultado.totalPerguntas} campos '
+          'foram preenchidos.',
+          textAlign: TextAlign.center,
         ),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               Navigator.pop(context);
             },
-            child: const Text('Voltar'),
+            child: const Text('Voltar ao início'),
           ),
         ],
       ),
@@ -174,197 +203,253 @@ class _QuizViewState extends State<QuizView> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.perguntas.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: Text(widget.titulo)),
+        body: const Center(child: Text('Nenhuma pergunta disponível.')),
+      );
+    }
+
+    final perguntaAtual = widget.perguntas[_paginaAtual];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.titulo),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          // Barra de progresso
-          LinearProgressIndicator(
-            value: (_paginaAtual + 1) / widget.perguntas.length,
-            minHeight: 8,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Pergunta ${_paginaAtual + 1} de ${widget.perguntas.length}',
-              style: const TextStyle(color: Colors.grey),
+      body: SafeArea(
+        child: Column(
+          children: [
+            LinearProgressIndicator(
+              value: (_paginaAtual + 1) / widget.perguntas.length,
+              minHeight: 8,
             ),
-          ),
-          // Perguntas
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _paginaAtual = index;
-                });
-              },
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: widget.perguntas.length,
-              itemBuilder: (context, index) {
-                final pergunta = widget.perguntas[index];
-                return _buildPergunta(pergunta, index);
-              },
-            ),
-          ),
-          // Botões de navegação
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _paginaAtual > 0 ? _paginaAnterior : null,
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Anterior'),
-                ),
-                if (_paginaAtual == widget.perguntas.length - 1)
-                  ElevatedButton.icon(
-                    onPressed: _finalizarQuiz,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Finalizar'),
-                  )
-                else
-                  ElevatedButton.icon(
-                    onPressed: _proximaPagina,
-                    icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Próxima'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      perguntaAtual.secao,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
-              ],
+                  Text(
+                    '${_paginaAtual + 1} de ${widget.perguntas.length}',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() => _paginaAtual = index);
+                },
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: widget.perguntas.length,
+                itemBuilder: (context, index) {
+                  return _buildPergunta(widget.perguntas[index], index);
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _paginaAtual > 0 ? _paginaAnterior : null,
+                      icon: const Icon(Icons.arrow_back),
+                      label: const Text('Anterior'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: _salvando
+                          ? null
+                          : _paginaAtual == widget.perguntas.length - 1
+                              ? _finalizarQuestionario
+                              : _proximaPagina,
+                      icon: _salvando
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Icon(
+                              _paginaAtual == widget.perguntas.length - 1
+                                  ? Icons.check
+                                  : Icons.arrow_forward,
+                            ),
+                      label: Text(
+                        _salvando
+                            ? 'Salvando...'
+                            : _paginaAtual == widget.perguntas.length - 1
+                                ? 'Finalizar'
+                                : 'Próxima',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildPergunta(QuizPergunta pergunta, int index) {
-    return Padding(
-      padding: const EdgeInsets.all(24),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            pergunta.titulo,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  pergunta.titulo,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (pergunta.obrigatoria)
+                const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: Text(
+                    '*',
+                    style: TextStyle(color: Colors.red, fontSize: 20),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            pergunta.descricao,
-            style: const TextStyle(fontSize: 16, color: Colors.grey),
-          ),
-          const SizedBox(height: 32),
-          Expanded(
-            child: _buildOpcoes(pergunta, index),
-          ),
+          if (pergunta.descricao.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primaryContainer
+                    .withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                pergunta.descricao,
+                style: TextStyle(color: Colors.grey[800], height: 1.4),
+              ),
+            ),
+          ],
+          const SizedBox(height: 28),
+          _buildCampoResposta(pergunta, index),
         ],
       ),
     );
   }
 
-  Widget _buildOpcoes(QuizPergunta pergunta, int index) {
+  Widget _buildCampoResposta(QuizPergunta pergunta, int index) {
     switch (pergunta.tipo) {
       case TipoPergunta.multiplaEscolha:
-        return ListView.builder(
-          itemCount: pergunta.opcoes.length,
-          itemBuilder: (context, i) {
-            final opcao = pergunta.opcoes[i];
-            final selecionada = _respostas[index] == opcao;
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _respostas[index] = opcao;
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: selecionada ? Colors.blue : Colors.grey[300]!,
-                      width: selecionada ? 2 : 1,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                    color: selecionada
-                        ? Colors.blue.withValues(alpha: 0.1)
-                        : Colors.white,
-                  ),
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    opcao,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          selecionada ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-
+        return _buildOpcoes(pergunta.opcoes, index);
       case TipoPergunta.simNao:
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildBotaoSimNao('Sim', true, index),
-            _buildBotaoSimNao('Não', false, index),
-          ],
-        );
-
+        return _buildOpcoes(const ['Sim', 'Não'], index);
+      case TipoPergunta.simNaoDesconhecido:
+        return _buildOpcoes(const ['Sim', 'Não', 'Desconhecido'], index);
       case TipoPergunta.texto:
-        return TextField(
-          onChanged: (value) {
-            setState(() {
-              _respostas[index] = value;
-            });
+      case TipoPergunta.textoLongo:
+      case TipoPergunta.numero:
+      case TipoPergunta.data:
+        return TextFormField(
+          key: ValueKey(pergunta.id),
+          initialValue: _respostas[index]?.toString(),
+          onChanged: (value) => _respostas[index] = value,
+          keyboardType: switch (pergunta.tipo) {
+            TipoPergunta.numero => const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            TipoPergunta.data => TextInputType.datetime,
+            _ => TextInputType.text,
           },
+          minLines: pergunta.tipo == TipoPergunta.textoLongo ? 5 : 1,
+          maxLines: pergunta.tipo == TipoPergunta.textoLongo ? 10 : 1,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            hintText: 'Sua resposta',
+            border: const OutlineInputBorder(),
+            hintText: switch (pergunta.tipo) {
+              TipoPergunta.data => 'DD/MM/AAAA',
+              TipoPergunta.numero => 'Digite um valor numérico',
+              TipoPergunta.textoLongo => 'Descreva as informações disponíveis',
+              _ => 'Digite sua resposta',
+            },
           ),
-          maxLines: null,
+        );
+      case TipoPergunta.familiares:
+        return FamilyInterviewField(
+          familiares: List<Map<String, dynamic>>.from(
+            _respostas[index] as List? ?? const [],
+          ),
+          parentescos: pergunta.opcoes,
+          onChanged: (familiares) {
+            setState(() => _respostas[index] = familiares);
+          },
         );
     }
   }
 
-  Widget _buildBotaoSimNao(String label, bool valor, int index) {
-    final selecionado = _respostas[index] == valor;
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: GestureDetector(
-          onTap: () {
-            setState(() {
-              _respostas[index] = valor;
-            });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: selecionado ? Colors.blue : Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: selecionado ? Colors.white : Colors.black,
+  Widget _buildOpcoes(List<String> opcoes, int index) {
+    return Column(
+      children: [
+        for (final opcao in opcoes)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: InkWell(
+              onTap: () => setState(() => _respostas[index] = opcao),
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: _respostas[index] == opcao
+                        ? Theme.of(context).colorScheme.primary
+                        : Colors.grey.shade300,
+                    width: _respostas[index] == opcao ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                  color: _respostas[index] == opcao
+                      ? Theme.of(context)
+                          .colorScheme
+                          .primaryContainer
+                          .withValues(alpha: 0.5)
+                      : null,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _respostas[index] == opcao
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_off,
+                      color: _respostas[index] == opcao
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(child: Text(opcao)),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+      ],
     );
   }
 }

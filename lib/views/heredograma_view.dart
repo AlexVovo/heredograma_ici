@@ -108,33 +108,66 @@ class _HeredogramaViewState extends State<HeredogramaView> {
   }
 
   List<Widget> _buildNiveis() {
-    // Níveis em ordem de cima para baixo
     final niveis = [
       {
         'titulo': 'Avós',
-        'lista': widget.pessoas.where((p) => p.parentesco == 'avo' || p.parentesco == 'ava').toList(),
+        'lista': _pessoasDoGrupo('avos'),
       },
       {
         'titulo': 'Pais',
-        'lista': widget.pessoas.where((p) => p.parentesco == 'pai' || p.parentesco == 'mae').toList(),
+        'lista': _pessoasDoGrupo('pais'),
       },
       {
         'titulo': 'Filhos',
-        'lista': widget.pessoas.where((p) => p.parentesco == 'filho' || p.parentesco == 'filha').toList(),
+        'lista': _pessoasDoGrupo('filhos'),
       },
       {
         'titulo': 'Irmãos',
-        'lista': widget.pessoas.where((p) => p.parentesco == 'irmao' || p.parentesco == 'irma').toList(),
+        'lista': _pessoasDoGrupo('irmaos'),
       },
       {
         'titulo': 'Tios',
-        'lista': widget.pessoas.where((p) => p.parentesco == 'tia' || p.parentesco == 'tio').toList(),
+        'lista': _pessoasDoGrupo('tios'),
+      },
+      {
+        'titulo': 'Primos',
+        'lista': _pessoasDoGrupo('primos'),
+      },
+      {
+        'titulo': 'Outros',
+        'lista': _pessoasDoGrupo('outros'),
       },
     ];
 
     return niveis.map((nivel) {
-      return _buildLinhaArvore(nivel['titulo'] as String, nivel['lista'] as List<Pessoa>);
+      return _buildLinhaArvore(
+          nivel['titulo'] as String, nivel['lista'] as List<Pessoa>);
     }).toList();
+  }
+
+  List<Pessoa> _pessoasDoGrupo(String grupo) => widget.pessoas
+      .where((pessoa) => _grupoParentesco(pessoa.parentesco) == grupo)
+      .toList();
+
+  String _grupoParentesco(String parentesco) {
+    final texto = parentesco.toLowerCase();
+    if (texto == 'pai' || texto == 'mae' || texto == 'mãe') return 'pais';
+    if (texto.contains('avô') ||
+        texto.contains('avó') ||
+        texto == 'avo' ||
+        texto == 'ava') {
+      return 'avos';
+    }
+    if (texto.contains('irmão') ||
+        texto.contains('irmã') ||
+        texto == 'irmao' ||
+        texto == 'irma') {
+      return 'irmaos';
+    }
+    if (texto.contains('tio') || texto.contains('tia')) return 'tios';
+    if (texto.contains('primo') || texto.contains('prima')) return 'primos';
+    if (texto.contains('filho') || texto.contains('filha')) return 'filhos';
+    return 'outros';
   }
 
   Widget _buildLinhaArvore(String titulo, List<Pessoa> lista) {
@@ -153,45 +186,19 @@ class _HeredogramaViewState extends State<HeredogramaView> {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: lista.map((p) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildPessoaArvore(p),
-          )).toList(),
+          children: lista
+              .map((p) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: _buildPessoaArvore(p),
+                  ))
+              .toList(),
         ),
       ],
     );
-  }
-
-  Widget _buildLinha(String titulo, List<Pessoa> lista) {
-    if (lista.isEmpty) return const SizedBox();
-
-    return Column(
-      children: [
-        const SizedBox(height: 24),
-        Text(
-          titulo,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: Colors.indigo[900],
-              ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          alignment: WrapAlignment.center,
-          runSpacing: 10,
-          spacing: 16,
-          children: lista.map((p) => _buildPessoa(p)).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPessoa(Pessoa p) {
-    _pessoaKeys.putIfAbsent(p.id, () => GlobalKey());
-    return _buildPessoaArvore(p);
   }
 
   Widget _buildPessoaArvore(Pessoa p) {
+    _pessoaKeys.putIfAbsent(p.id, GlobalKey.new);
     final isMale = p.sexo == 'M';
     final shape = isMale ? BoxShape.rectangle : BoxShape.circle;
     Color borderColor = Colors.green.shade700;
@@ -271,56 +278,6 @@ class _HeredogramaViewState extends State<HeredogramaView> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildIconPessoa(Pessoa p) {
-    final shape = p.sexo == 'M' ? BoxShape.rectangle : BoxShape.circle;
-
-    Color borderColor = Colors.green.shade700;
-
-    if (p.temCancer) {
-      borderColor = Colors.red.shade900;
-    } else if (p.portador) {
-      borderColor = Colors.orange;
-    }
-
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            shape: shape,
-            color: p.temCancer ? Colors.black : Colors.white,
-            border: Border.all(color: borderColor, width: 2),
-          ),
-        ),
-
-        // 🔥 meio preenchido (portador)
-        if (p.portador && !p.temCancer)
-          ClipRect(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              widthFactor: 0.5,
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.6),
-                  shape: shape,
-                ),
-              ),
-            ),
-          ),
-
-        Icon(
-          p.sexo == 'M' ? Icons.male : Icons.female,
-          color: p.temCancer ? Colors.white : borderColor,
-          size: 26,
-        ),
-      ],
     );
   }
 }

@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "name": "Heredograma ICI (Chrome)",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
+            "type": "dart",
+            "deviceId": "chrome",
+            "program": "lib/main.dart"
         }
     ]
 }

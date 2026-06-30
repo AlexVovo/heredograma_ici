@@ -51,6 +51,7 @@ class FirestoreService {
         'pacienteNome': heredograma.pacienteNome,
         'pacienteIdade': heredograma.pacienteIdade,
         'pacienteSexo': heredograma.pacienteSexo,
+        'entrevistaRespostas': heredograma.entrevistaRespostas,
         'pessoas': heredograma.pessoas
             .map((p) => {
                   'id': p.id,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
+import 'package:heredograma_ici/services/pdf_service.dart';
 import 'heredograma_view.dart';
 import 'heredograma_detail_view.dart';
 
@@ -13,6 +14,7 @@ class HeredogramasListView extends StatefulWidget {
 
 class _HeredogramasListViewState extends State<HeredogramasListView> {
   final _service = FirestoreService();
+  final _pdfService = PdfService();
   final _searchController = TextEditingController();
   String _filtro = '';
 
@@ -26,8 +28,8 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deletar heredograma?'),
-        content: Text('Tem certeza que deseja deletar "$titulo"?'),
+        title: const Text('Excluir caso?'),
+        content: Text('Tem certeza que deseja excluir "$titulo"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -38,10 +40,10 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
               _service.deletarHeredograma(id);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Heredograma deletado')),
+                const SnackBar(content: Text('Caso excluído')),
               );
             },
-            child: const Text('Deletar', style: TextStyle(color: Colors.red)),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -52,7 +54,7 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Heredogramas Salvos'),
+        title: const Text('Casos salvos'),
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton(
@@ -140,7 +142,7 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
                         const SizedBox(height: 16),
                         Text(
                           _filtro.isEmpty
-                              ? 'Nenhum heredograma salvo'
+                              ? 'Nenhum caso salvo'
                               : 'Nenhum resultado encontrado',
                           style: const TextStyle(color: Colors.grey),
                         ),
@@ -220,6 +222,16 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
                       PopupMenuItem(
                         child: const Row(
                           children: [
+                            Icon(Icons.picture_as_pdf_outlined, size: 20),
+                            SizedBox(width: 8),
+                            Text('Gerar PDF'),
+                          ],
+                        ),
+                        onTap: () => _gerarPdf(heredograma),
+                      ),
+                      PopupMenuItem(
+                        child: const Row(
+                          children: [
                             Icon(Icons.visibility, size: 20),
                             SizedBox(width: 8),
                             Text('Visualizar'),
@@ -260,7 +272,7 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
                           children: [
                             Icon(Icons.delete, size: 20, color: Colors.red),
                             SizedBox(width: 8),
-                            Text('Deletar',
+                            Text('Excluir',
                                 style: TextStyle(color: Colors.red)),
                           ],
                         ),
@@ -321,7 +333,7 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
                     Icon(Icons.group, size: 16, color: Colors.grey[500]),
                     const SizedBox(width: 8),
                     Text(
-                      '${heredograma.pessoas.length} familiares',
+                      '${heredograma.pessoas.length} pessoas no heredograma',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
                   ],
@@ -343,6 +355,22 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
         ),
       ),
     );
+  }
+
+  Future<void> _gerarPdf(Heredograma heredograma) async {
+    try {
+      final caminho = await _pdfService.gerarHeredograma(heredograma);
+      if (caminho != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('PDF salvo em: $caminho')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao gerar PDF: $e')),
+      );
+    }
   }
 
   String _formatarData(DateTime data) {

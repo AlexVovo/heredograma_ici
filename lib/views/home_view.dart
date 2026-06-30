@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/data/historico_familiar_questionario.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
+import 'package:heredograma_ici/models/pessoa_model.dart';
+import 'package:heredograma_ici/services/firestore_service.dart';
 import 'package:heredograma_ici/views/quiz_view.dart';
 import 'package:heredograma_ici/views/heredograma_detail_view.dart';
 import 'heredogramas_list_view.dart';
@@ -139,12 +142,12 @@ class HomeView extends StatelessWidget {
                     ),
                     _buildActionCard(
                       context,
-                      icon: Icons.quiz_outlined,
-                      title: 'Quiz',
-                      subtitle: 'Genética',
+                      icon: Icons.assignment_outlined,
+                      title: 'Formulário',
+                      subtitle: 'Histórico familiar',
                       color: Colors.orange,
                       onTap: () {
-                        _mostrarQuizDemo(context);
+                        _abrirFormularioHistorico(context);
                       },
                     ),
                     _buildActionCard(
@@ -326,57 +329,176 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  void _mostrarQuizDemo(BuildContext context) {
-    final perguntas = [
-      QuizPergunta(
-        id: '1',
-        titulo: 'O que é um gene dominante?',
-        descricao:
-            'Um gene que se expressa mesmo quando herdado de apenas um dos pais',
-        tipo: TipoPergunta.multiplaEscolha,
-        opcoes: [
-          'Um gene que sempre está ativo',
-          'Um gene que se expressa mesmo em dose única',
-          'Um gene raro na população',
-          'Um gene que causa doença',
-        ],
-        respostaCorreta: 'Um gene que se expressa mesmo em dose única',
-        explicacao:
-            'Genes dominantes se expressam mesmo quando herdados de apenas um dos pais.',
-      ),
-      QuizPergunta(
-        id: '2',
-        titulo: 'O câncer de mama hereditário está sempre presente?',
-        descricao:
-            'Se um membro da família tem câncer de mama hereditário, todos os portadores desenvolverão câncer?',
-        tipo: TipoPergunta.simNao,
-        opcoes: ['Sim', 'Não'],
-        respostaCorreta: false,
-        explicacao:
-            'Nem todos os portadores de mutações hereditárias desenvolvem a doença. Outros fatores ambientais influenciam.',
-      ),
-      QuizPergunta(
-        id: '3',
-        titulo: 'Como é a herança autossômica recessiva?',
-        descricao:
-            'Descreva brevemente como funciona a herança autossômica recessiva',
-        tipo: TipoPergunta.texto,
-        opcoes: [],
-        respostaCorreta:
-            'Precisa herdar duas cópias do gene mutante (uma de cada pai)',
-      ),
-    ];
-
+  void _abrirFormularioHistorico(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => QuizView(
-          titulo: 'Quiz de Genética',
-          descricao: 'Teste seus conhecimentos sobre hereditariedade',
-          perguntas: perguntas,
+          titulo: 'Histórico familiar',
+          descricao:
+              'Formulário para histórico familiar em oncologia pediátrica',
+          perguntas: perguntasHistoricoFamiliar,
+          onCompletar: _salvarEntrevista,
         ),
       ),
     );
+  }
+
+  Future<void> _salvarEntrevista(QuizResultado resultado) async {
+    bool preenchida(dynamic resposta) {
+      if (resposta == null) return false;
+      if (resposta is String) return resposta.trim().isNotEmpty;
+      if (resposta is Iterable) return resposta.isNotEmpty;
+      if (resposta is Map) return resposta.isNotEmpty;
+      return true;
+    }
+
+    final respostas = <String, dynamic>{
+      for (final item in resultado.respostas)
+        if (preenchida(item.resposta)) item.perguntaId: item.resposta,
+    };
+
+    String texto(String id, [String fallback = '']) =>
+        respostas[id]?.toString().trim() ?? fallback;
+    int? numero(String id) =>
+        int.tryParse(texto(id).replaceAll(',', '.').split('.').first);
+
+    final agora = DateTime.now();
+    final baseId = agora.microsecondsSinceEpoch.toString();
+    final pacienteId = '${baseId}_paciente';
+    final paiId = '${baseId}_pai';
+    final maeId = '${baseId}_mae';
+    final sexoPaciente = texto('1.4') == 'Feminino' ? 'F' : 'M';
+    final temCancerPaciente = texto('3.1') == 'Sim';
+    final diagnosticoPai = texto('5.6');
+    final diagnosticoMae = texto('7.6');
+
+    final pessoas = [
+      Pessoa(
+        id: paiId,
+        nome: texto('5.1', 'Pai não informado'),
+        sexo: 'M',
+        parentesco: 'pai',
+        temCancer: diagnosticoPai.isNotEmpty && diagnosticoPai != 'Nenhum',
+        tipoCancer: diagnosticoPai.isEmpty || diagnosticoPai == 'Nenhum'
+            ? null
+            : diagnosticoPai,
+        conjugeId: maeId,
+      ),
+      Pessoa(
+        id: maeId,
+        nome: texto('7.1', 'Mãe não informada'),
+        sexo: 'F',
+        parentesco: 'mae',
+        temCancer: diagnosticoMae.isNotEmpty && diagnosticoMae != 'Nenhum',
+        tipoCancer: diagnosticoMae.isEmpty || diagnosticoMae == 'Nenhum'
+            ? null
+            : diagnosticoMae,
+        conjugeId: paiId,
+      ),
+      Pessoa(
+        id: pacienteId,
+        nome: texto('1.1', texto('1.2', 'Paciente')),
+        sexo: sexoPaciente,
+        parentesco: sexoPaciente == 'F' ? 'filha' : 'filho',
+        temCancer: temCancerPaciente,
+        tipoCancer: temCancerPaciente ? texto('3.2') : null,
+        idadeDiagnostico: temCancerPaciente ? numero('3.3') : null,
+        paiId: paiId,
+        maeId: maeId,
+      ),
+    ];
+
+    for (final blocoId in const ['4', '6', '8', '9']) {
+      final registros = respostas[blocoId];
+      if (registros is! List) continue;
+
+      for (var i = 0; i < registros.length; i++) {
+        final registro = Map<String, dynamic>.from(registros[i] as Map);
+        final parentesco =
+            registro['parentesco']?.toString() ?? 'Outro parente';
+        final diagnostico = registro['diagnostico']?.toString().trim() ?? '';
+        final genero = registro['genero']?.toString() ?? '';
+        final id = '${baseId}_${blocoId}_$i';
+        final pessoa = Pessoa(
+          id: id,
+          nome: registro['nome']?.toString().trim().isNotEmpty == true
+              ? registro['nome'].toString()
+              : parentesco,
+          sexo: _sexoFamiliar(genero, parentesco),
+          parentesco: parentesco,
+          temCancer: diagnostico.isNotEmpty && diagnostico != 'Nenhum',
+          tipoCancer: diagnostico.isEmpty || diagnostico == 'Nenhum'
+              ? null
+              : diagnostico,
+          idadeDiagnostico: registro['idadeDiagnostico'] as int?,
+        );
+
+        if (blocoId == '4') {
+          if (!parentesco.contains('Materno')) pessoa.paiId = paiId;
+          if (!parentesco.contains('Paterno')) pessoa.maeId = maeId;
+        } else if (blocoId == '6') {
+          if (parentesco.startsWith('Avô')) pessoas[0].paiId = id;
+          if (parentesco.startsWith('Avó')) pessoas[0].maeId = id;
+        } else if (blocoId == '8') {
+          if (parentesco.startsWith('Avô')) pessoas[1].paiId = id;
+          if (parentesco.startsWith('Avó')) pessoas[1].maeId = id;
+        } else if (parentesco == 'Filho' || parentesco == 'Filha') {
+          if (sexoPaciente == 'M') {
+            pessoa.paiId = pacienteId;
+          } else {
+            pessoa.maeId = pacienteId;
+          }
+        } else if (parentesco == 'Cônjuge') {
+          pessoas[2].conjugeId = id;
+          pessoa.conjugeId = pacienteId;
+        }
+
+        pessoas.add(pessoa);
+      }
+    }
+
+    await FirestoreService().criarHeredograma(
+      Heredograma(
+        id: '',
+        titulo: 'Caso ${texto('1.2', texto('1.1', 'sem identificação'))}',
+        descricao: 'Entrevista de histórico familiar em oncologia pediátrica.',
+        pessoas: pessoas,
+        dataCriacao: agora,
+        pacienteNome: texto('1.1', texto('1.2', 'Paciente')),
+        pacienteIdade: _calcularIdade(texto('1.3')),
+        pacienteSexo: sexoPaciente,
+        entrevistaRespostas: respostas,
+      ),
+    );
+  }
+
+  String _sexoFamiliar(String genero, String parentesco) {
+    if (genero == 'Masculino') return 'M';
+    if (genero == 'Feminino') return 'F';
+    final texto = parentesco.toLowerCase();
+    return texto.contains('irmã') ||
+            texto.contains('avó') ||
+            texto.contains('tia') ||
+            texto.contains('prima') ||
+            texto.contains('filha')
+        ? 'F'
+        : 'M';
+  }
+
+  int? _calcularIdade(String nascimento) {
+    final partes = nascimento.split('/');
+    if (partes.length != 3) return null;
+    final data = DateTime.tryParse('${partes[2]}-${partes[1]}-${partes[0]}');
+    if (data == null) return null;
+
+    final hoje = DateTime.now();
+    var idade = hoje.year - data.year;
+    if (hoje.month < data.month ||
+        (hoje.month == data.month && hoje.day < data.day)) {
+      idade--;
+    }
+    return idade >= 0 ? idade : null;
   }
 
   void _mostrarSobre(BuildContext context) {

@@ -11,6 +11,7 @@ class Heredograma {
   final String pacienteNome;
   final int? pacienteIdade;
   final String? pacienteSexo;
+  final Map<String, dynamic> entrevistaRespostas;
 
   Heredograma({
     required this.id,
@@ -22,6 +23,7 @@ class Heredograma {
     required this.pacienteNome,
     this.pacienteIdade,
     this.pacienteSexo,
+    this.entrevistaRespostas = const {},
   });
 
   // Converter para JSON para Firestore
@@ -32,6 +34,7 @@ class Heredograma {
       'pacienteNome': pacienteNome,
       'pacienteIdade': pacienteIdade,
       'pacienteSexo': pacienteSexo,
+      'entrevistaRespostas': entrevistaRespostas,
       'pessoas': pessoas
           .map((p) => {
                 'id': p.id,
@@ -81,6 +84,9 @@ class Heredograma {
       pacienteNome: json['pacienteNome'] ?? '',
       pacienteIdade: json['pacienteIdade'],
       pacienteSexo: json['pacienteSexo'],
+      entrevistaRespostas: Map<String, dynamic>.from(
+        json['entrevistaRespostas'] as Map? ?? const {},
+      ),
     );
   }
 
@@ -101,6 +107,7 @@ class Heredograma {
     String? pacienteNome,
     int? pacienteIdade,
     String? pacienteSexo,
+    Map<String, dynamic>? entrevistaRespostas,
   }) {
     return Heredograma(
       id: id,
@@ -112,6 +119,7 @@ class Heredograma {
       pacienteNome: pacienteNome ?? this.pacienteNome,
       pacienteIdade: pacienteIdade ?? this.pacienteIdade,
       pacienteSexo: pacienteSexo ?? this.pacienteSexo,
+      entrevistaRespostas: entrevistaRespostas ?? this.entrevistaRespostas,
     );
   }
 }
