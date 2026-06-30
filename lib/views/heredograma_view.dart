@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import '../models/pessoa_model.dart';
 import '../widgets/linha_painter.dart';
 
@@ -88,7 +89,7 @@ class _HeredogramaViewState extends State<HeredogramaView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Heredograma')),
+      appBar: const BrandedAppBar(title: 'Heredograma'),
       backgroundColor: const Color(0xFFF4F7FB),
       body: Stack(
         key: _stackKey,

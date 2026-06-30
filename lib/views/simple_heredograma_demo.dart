@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 
 class SimpleHeredogramaDemo extends StatelessWidget {
   const SimpleHeredogramaDemo({super.key});
@@ -7,8 +8,8 @@ class SimpleHeredogramaDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F6FB),
-      appBar: AppBar(
-        title: const Text('Heredograma simples'),
+      appBar: BrandedAppBar(
+        title: 'Heredograma simples',
         backgroundColor: Colors.indigo.shade800,
         foregroundColor: Colors.white,
       ),

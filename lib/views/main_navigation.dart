@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/widgets/brand_logo.dart';
 import 'home_view.dart';
 import 'heredogramas_list_view.dart';
 
@@ -15,7 +16,16 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _pages = [
     const HomeView(),
     const HeredogramasListView(),
-    const Center(child: Text('Perfil (em breve)')),
+    const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          BrandLogo(width: 220),
+          SizedBox(height: 16),
+          Text('Perfil (em breve)'),
+        ],
+      ),
+    ),
   ];
 
   @override

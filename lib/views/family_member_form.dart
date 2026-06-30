@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'package:uuid/uuid.dart';
 
 class FamilyMemberForm extends StatefulWidget {
@@ -66,9 +67,7 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Adicionar Familiar'),
-      ),
+      appBar: const BrandedAppBar(title: 'Adicionar Familiar'),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

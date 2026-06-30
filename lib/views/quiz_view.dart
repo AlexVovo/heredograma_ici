@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 
 import 'family_interview_field.dart';
 
@@ -205,7 +206,7 @@ class _QuizViewState extends State<QuizView> {
   Widget build(BuildContext context) {
     if (widget.perguntas.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(widget.titulo)),
+        appBar: BrandedAppBar(title: widget.titulo),
         body: const Center(child: Text('Nenhuma pergunta disponível.')),
       );
     }
@@ -213,8 +214,8 @@ class _QuizViewState extends State<QuizView> {
     final perguntaAtual = widget.perguntas[_paginaAtual];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.titulo),
+      appBar: BrandedAppBar(
+        title: widget.titulo,
         elevation: 0,
       ),
       body: SafeArea(

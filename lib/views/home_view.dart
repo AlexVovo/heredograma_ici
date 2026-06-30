@@ -5,6 +5,8 @@ import 'package:heredograma_ici/models/pessoa_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
 import 'package:heredograma_ici/views/quiz_view.dart';
 import 'package:heredograma_ici/views/heredograma_detail_view.dart';
+import 'package:heredograma_ici/widgets/brand_logo.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'heredogramas_list_view.dart';
 
 class HomeView extends StatelessWidget {
@@ -13,8 +15,8 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Heredograma ICI'),
+      appBar: const BrandedAppBar(
+        title: 'HeredoConco',
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -39,10 +41,12 @@ class HomeView extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(
-                          Icons.account_tree,
-                          size: 40,
-                          color: Colors.white,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: const BrandLogo.compact(
+                            width: 54,
+                            height: 54,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -57,7 +61,7 @@ class HomeView extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Crie e gerencie seus heredogramas',
+                              'Crie manualmente ou a partir do questionário',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.white.withValues(alpha: 0.9),
@@ -101,8 +105,8 @@ class HomeView extends StatelessWidget {
                     _buildActionCard(
                       context,
                       icon: Icons.add_circle_outline,
-                      title: 'Novo',
-                      subtitle: 'Heredograma',
+                      title: 'Novo heredograma',
+                      subtitle: 'Criação manual, membro por membro',
                       color: Colors.blue,
                       onTap: () {
                         Navigator.push(
@@ -143,8 +147,9 @@ class HomeView extends StatelessWidget {
                     _buildActionCard(
                       context,
                       icon: Icons.assignment_outlined,
-                      title: 'Formulário',
-                      subtitle: 'Histórico familiar',
+                      title: 'Histórico familiar',
+                      subtitle:
+                          'Questionário para criar o heredograma automaticamente',
                       color: Colors.orange,
                       onTap: () {
                         _abrirFormularioHistorico(context);
@@ -220,19 +225,23 @@ class HomeView extends StatelessWidget {
                     const SizedBox(height: 12),
                     _buildDica(
                       '1.',
-                      'Clique em "Novo" para criar um novo heredograma',
+                      'Escolha como deseja começar: criação manual ou questionário de histórico familiar.',
                     ),
                     _buildDica(
                       '2.',
-                      'Adicione os membros da família e suas informações',
+                      'Em "Novo heredograma", cadastre manualmente o paciente, os familiares, diagnósticos e relações de parentesco.',
                     ),
                     _buildDica(
                       '3.',
-                      'Indique relações de parentesco e doenças',
+                      'Em "Histórico familiar", responda ao questionário para o aplicativo criar automaticamente um heredograma com base nas respostas.',
                     ),
                     _buildDica(
                       '4.',
-                      'Visualize e salve seu heredograma',
+                      'Revise o resultado, faça os ajustes necessários e salve o heredograma.',
+                    ),
+                    _buildDica(
+                      '5.',
+                      'Use "Listar heredogramas" para consultar, editar, visualizar ou exportar os casos salvos.',
                     ),
                   ],
                 ),
@@ -260,6 +269,7 @@ class HomeView extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             color: color.withValues(alpha: 0.1),
           ),
+          padding: const EdgeInsets.all(10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -272,14 +282,19 @@ class HomeView extends StatelessWidget {
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
+              const SizedBox(height: 3),
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -510,8 +525,10 @@ class HomeView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(child: BrandLogo(width: 220)),
+            SizedBox(height: 12),
             Text(
-              'Heredograma ICI',
+              'HeredoConco',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 12),

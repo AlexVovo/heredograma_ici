@@ -1,11 +1,11 @@
 {
-    "name": "heredograma_ici",
-    "short_name": "heredograma_ici",
+    "name": "HeredoConco",
+    "short_name": "HeredoConco",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#0F766E",
+    "description": "Mapeie histórias. Entenda gerações. Promova saúde.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

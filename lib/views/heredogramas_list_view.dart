@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
 import 'package:heredograma_ici/services/pdf_service.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'heredograma_view.dart';
 import 'heredograma_detail_view.dart';
 
@@ -53,8 +54,8 @@ class _HeredogramasListViewState extends State<HeredogramasListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Casos salvos'),
+      appBar: const BrandedAppBar(
+        title: 'Casos salvos',
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton(

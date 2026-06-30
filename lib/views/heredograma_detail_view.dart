@@ -3,6 +3,7 @@ import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/models/pessoa_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
 import 'package:heredograma_ici/services/pdf_service.dart';
+import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'family_member_form.dart';
 import 'heredograma_view.dart';
 
@@ -127,8 +128,8 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isNew ? 'Novo Heredograma' : 'Detalhes do Heredograma'),
+      appBar: BrandedAppBar(
+        title: _isNew ? 'Novo Heredograma' : 'Detalhes do Heredograma',
         actions: [
           if (!_isEditing)
             IconButton(
