@@ -16,239 +16,274 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BrandedAppBar(
-        title: 'HeredoConco',
+        title: 'HeredoOnco',
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Banner bem-vindo
-            Card(
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade800],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
+      body: LayoutBuilder(
+        builder: (context, viewport) {
+          final isMobile = viewport.maxWidth < 600;
+          final horizontalPadding = isMobile ? 16.0 : 32.0;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(
+              horizontalPadding,
+              isMobile ? 16 : 28,
+              horizontalPadding,
+              32,
+            ),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1180),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: const BrandLogo.compact(
-                            width: 54,
-                            height: 54,
+                    // Banner bem-vindo
+                    Card(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.blue.shade400,
+                              Colors.blue.shade800
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Column(
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Bem-vindo',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              'Crie manualmente ou a partir do questionário',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white.withValues(alpha: 0.9),
-                              ),
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: const BrandLogo.compact(
+                                    width: 54,
+                                    height: 54,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Bem-vindo',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Crie manualmente ou a partir do questionário',
+                                        maxLines: isMobile ? 2 : 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.white
+                                              .withValues(alpha: 0.9),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Seção de Ações Rápidas
-            const Text(
-              'Ações Rápidas',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // Grid responsivo
-            LayoutBuilder(
-              builder: (context, constraints) {
-                int crossAxisCount = 2;
-                if (constraints.maxWidth > 700) {
-                  crossAxisCount = 4;
-                }
-
-                return GridView.count(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    _buildActionCard(
-                      context,
-                      icon: Icons.add_circle_outline,
-                      title: 'Novo heredograma',
-                      subtitle: 'Criação manual, membro por membro',
-                      color: Colors.blue,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => HeredogramaDetailView(
-                              heredograma: Heredograma(
-                                id: '',
-                                titulo: '',
-                                descricao: '',
-                                pessoas: [],
-                                dataCriacao: DateTime.now(),
-                                pacienteNome: '',
-                                pacienteIdade: null,
-                                pacienteSexo: 'M',
-                              ),
-                              isEditing: true,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildActionCard(
-                      context,
-                      icon: Icons.list_alt_rounded,
-                      title: 'Listar',
-                      subtitle: 'Heredogramas',
-                      color: Colors.green,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const HeredogramasListView(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildActionCard(
-                      context,
-                      icon: Icons.assignment_outlined,
-                      title: 'Histórico familiar',
-                      subtitle:
-                          'Questionário para criar o heredograma automaticamente',
-                      color: Colors.orange,
-                      onTap: () {
-                        _abrirFormularioHistorico(context);
-                      },
-                    ),
-                    _buildActionCard(
-                      context,
-                      icon: Icons.info_outline,
-                      title: 'Sobre',
-                      subtitle: 'App',
-                      color: Colors.purple,
-                      onTap: () {
-                        _mostrarSobre(context);
-                      },
-                    ),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Seção de Informações
-            const Text(
-              'Informações',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'O que é um Heredograma?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Um heredograma (ou pedigree) é um diagrama que mostra a ocorrência de uma doença genética ou traço hereditário em uma família. Ele ajuda a visualizar padrões de herança e identificar indivíduos portadores de genes recessivos.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
+                    const SizedBox(height: 24),
 
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                    // Seção de Ações Rápidas
                     const Text(
-                      'Como Usar?',
+                      'Ações Rápidas',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildDica(
-                      '1.',
-                      'Escolha como deseja começar: criação manual ou questionário de histórico familiar.',
+
+                    // Grid responsivo
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final width = constraints.maxWidth;
+                        final crossAxisCount = width < 520
+                            ? 1
+                            : width < 900
+                                ? 2
+                                : 4;
+                        final childAspectRatio = width < 520
+                            ? 2.6
+                            : width < 900
+                                ? 1.25
+                                : 1.15;
+
+                        return GridView.count(
+                          crossAxisCount: crossAxisCount,
+                          childAspectRatio: childAspectRatio,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            _buildActionCard(
+                              context,
+                              icon: Icons.add_circle_outline,
+                              title: 'Novo heredograma',
+                              subtitle: 'Criação manual, membro por membro',
+                              color: Colors.blue,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => HeredogramaDetailView(
+                                      heredograma: Heredograma(
+                                        id: '',
+                                        titulo: '',
+                                        descricao: '',
+                                        pessoas: [],
+                                        dataCriacao: DateTime.now(),
+                                        pacienteNome: '',
+                                        pacienteIdade: null,
+                                        pacienteSexo: 'M',
+                                      ),
+                                      isEditing: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildActionCard(
+                              context,
+                              icon: Icons.list_alt_rounded,
+                              title: 'Listar',
+                              subtitle: 'Heredogramas',
+                              color: Colors.green,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        const HeredogramasListView(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildActionCard(
+                              context,
+                              icon: Icons.assignment_outlined,
+                              title: 'Histórico familiar',
+                              subtitle:
+                                  'Questionário para criar o heredograma automaticamente',
+                              color: Colors.orange,
+                              onTap: () {
+                                _abrirFormularioHistorico(context);
+                              },
+                            ),
+                            _buildActionCard(
+                              context,
+                              icon: Icons.info_outline,
+                              title: 'Sobre',
+                              subtitle: 'App',
+                              color: Colors.purple,
+                              onTap: () {
+                                _mostrarSobre(context);
+                              },
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    _buildDica(
-                      '2.',
-                      'Em "Novo heredograma", cadastre manualmente o paciente, os familiares, diagnósticos e relações de parentesco.',
+                    const SizedBox(height: 24),
+
+                    // Seção de Informações
+                    const Text(
+                      'Informações',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _buildDica(
-                      '3.',
-                      'Em "Histórico familiar", responda ao questionário para o aplicativo criar automaticamente um heredograma com base nas respostas.',
+                    const SizedBox(height: 12),
+
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'O que é um Heredograma?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Um heredograma (ou pedigree) é um diagrama que mostra a ocorrência de uma doença genética ou traço hereditário em uma família. Ele ajuda a visualizar padrões de herança e identificar indivíduos portadores de genes recessivos.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[700],
+                                height: 1.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    _buildDica(
-                      '4.',
-                      'Revise o resultado, faça os ajustes necessários e salve o heredograma.',
-                    ),
-                    _buildDica(
-                      '5.',
-                      'Use "Listar heredogramas" para consultar, editar, visualizar ou exportar os casos salvos.',
+                    const SizedBox(height: 16),
+
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Como Usar?',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDica(
+                              '1.',
+                              'Escolha como deseja começar: criação manual ou questionário de histórico familiar.',
+                            ),
+                            _buildDica(
+                              '2.',
+                              'Em "Novo heredograma", cadastre manualmente o paciente, os familiares, diagnósticos e relações de parentesco.',
+                            ),
+                            _buildDica(
+                              '3.',
+                              'Em "Histórico familiar", responda ao questionário para o aplicativo criar automaticamente um heredograma com base nas respostas.',
+                            ),
+                            _buildDica(
+                              '4.',
+                              'Revise o resultado, faça os ajustes necessários e salve o heredograma.',
+                            ),
+                            _buildDica(
+                              '5.',
+                              'Use "Listar heredogramas" para consultar, editar, visualizar ou exportar os casos salvos.',
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -528,7 +563,7 @@ class HomeView extends StatelessWidget {
             Center(child: BrandLogo(width: 220)),
             SizedBox(height: 12),
             Text(
-              'HeredoConco',
+              'HeredoOnco',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             SizedBox(height: 12),

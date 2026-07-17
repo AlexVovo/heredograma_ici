@@ -30,30 +30,81 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_index],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (value) {
-          setState(() {
-            _index = value;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Início',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useNavigationRail = constraints.maxWidth >= 900;
+
+        if (useNavigationRail) {
+          return Scaffold(
+            body: Row(
+              children: [
+                SafeArea(
+                  child: NavigationRail(
+                    extended: constraints.maxWidth >= 1180,
+                    selectedIndex: _index,
+                    onDestinationSelected: _selectPage,
+                    groupAlignment: -0.75,
+                    leading: const Padding(
+                      padding: EdgeInsets.fromLTRB(12, 12, 12, 28),
+                      child: BrandLogo.compact(width: 48, height: 48),
+                    ),
+                    destinations: const [
+                      NavigationRailDestination(
+                        icon: Icon(Icons.home_outlined),
+                        selectedIcon: Icon(Icons.home_rounded),
+                        label: Text('Início'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.account_tree_outlined),
+                        selectedIcon: Icon(Icons.account_tree_rounded),
+                        label: Text('Heredogramas'),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.person_outline_rounded),
+                        selectedIcon: Icon(Icons.person_rounded),
+                        label: Text('Perfil'),
+                      ),
+                    ],
+                  ),
+                ),
+                const VerticalDivider(width: 1),
+                Expanded(child: _pages[_index]),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          body: _pages[_index],
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _index,
+            onTap: _selectPage,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined),
+                activeIcon: Icon(Icons.home_rounded),
+                label: 'Início',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_tree_outlined),
+                activeIcon: Icon(Icons.account_tree_rounded),
+                label: 'Heredogramas',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_outline_rounded),
+                activeIcon: Icon(Icons.person_rounded),
+                label: 'Perfil',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Heredogramas',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  void _selectPage(int value) {
+    setState(() {
+      _index = value;
+    });
   }
 }

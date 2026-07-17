@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BrandLogo extends StatelessWidget {
-  static const String fullAsset = 'assets/images/heredoconco_logo.png';
-  static const String iconAsset = 'assets/images/heredoconco_icon.png';
+  static const String fullAsset = 'assets/images/heredoonco_logo.png';
+  static const String iconAsset = 'assets/images/heredoonco_icon.png';
 
   final double? width;
   final double? height;
@@ -32,7 +32,7 @@ class BrandLogo extends StatelessWidget {
       height: height,
       fit: fit,
       filterQuality: FilterQuality.high,
-      semanticLabel: 'Logo HeredoConco',
+      semanticLabel: 'Logo HeredoOnco',
     );
   }
 }

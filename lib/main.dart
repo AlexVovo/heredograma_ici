@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'HeredoConco',
+      title: 'HeredoOnco',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       home: FutureBuilder<void>(
