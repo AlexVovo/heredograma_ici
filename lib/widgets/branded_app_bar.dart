@@ -21,7 +21,7 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(76);
+  Size get preferredSize => const Size.fromHeight(82);
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +30,10 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDesktop = screenWidth >= 900;
     final isCompact = screenWidth < 600;
     final isVeryCompact = screenWidth < 360;
-    final logoSize = isCompact ? 40.0 : 46.0;
+    final logoSize = isCompact ? 46.0 : 52.0;
 
     return AppBar(
-      toolbarHeight: 76,
+      toolbarHeight: 82,
       backgroundColor: Colors.transparent,
       foregroundColor: effectiveForegroundColor,
       surfaceTintColor: Colors.transparent,
@@ -118,7 +118,7 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: effectiveForegroundColor,
-                    fontSize: isCompact ? 17 : 19,
+                    fontSize: isCompact ? 19 : 21,
                     height: 1.1,
                     fontWeight: FontWeight.w800,
                     letterSpacing: -0.25,
@@ -136,10 +136,10 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: effectiveForegroundColor.withValues(alpha: 0.72),
-                      fontSize: isCompact ? 8.5 : 9.5,
-                      height: 1,
+                      fontSize: isCompact ? 10.5 : 11.5,
+                      height: 1.1,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: isCompact ? 0.8 : 1.15,
+                      letterSpacing: isCompact ? 0.55 : 0.8,
                     ),
                   ),
                 ],

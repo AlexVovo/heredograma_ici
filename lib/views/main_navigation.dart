@@ -202,7 +202,7 @@ class _BrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 76,
+      height: 82,
       padding: EdgeInsets.symmetric(horizontal: extended ? 18 : 17),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -216,9 +216,9 @@ class _BrandHeader extends StatelessWidget {
             extended ? MainAxisAlignment.start : MainAxisAlignment.center,
         children: [
           Container(
-            width: 46,
-            height: 46,
-            padding: const EdgeInsets.all(5),
+            width: 54,
+            height: 54,
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -243,21 +243,21 @@ class _BrandHeader extends StatelessWidget {
                     'HeredoOnco',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 19,
+                      fontSize: 21,
                       height: 1,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -.3,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  SizedBox(height: 6),
                   Text(
                     'GENÉTICA  •  CUIDADO',
                     maxLines: 1,
                     style: TextStyle(
                       color: Color(0xFFB7E1E3),
-                      fontSize: 8.5,
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: .9,
+                      letterSpacing: .55,
                     ),
                   ),
                 ],

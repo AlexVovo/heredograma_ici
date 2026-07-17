@@ -19,9 +19,12 @@ class SplashScreen extends StatelessWidget {
               opacity: ((scale - 0.88) / 0.12).clamp(0, 1),
               child: Transform.scale(scale: scale, child: child),
             ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 40),
-              child: BrandLogo(width: 360),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final available = constraints.maxWidth - 48;
+                final logoWidth = available > 500 ? 500.0 : available;
+                return BrandLogo(width: logoWidth);
+              },
             ),
           ),
         ),
