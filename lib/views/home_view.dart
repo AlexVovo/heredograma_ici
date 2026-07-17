@@ -421,7 +421,7 @@ class HomeView extends StatelessWidget {
     final sexoPaciente = texto('1.4') == 'Feminino' ? 'F' : 'M';
     final temCancerPaciente = texto('3.1') == 'Sim';
     final diagnosticoPai = texto('5.6');
-    final diagnosticoMae = texto('7.6');
+    final diagnosticoMae = texto('9.9');
 
     final pessoas = [
       Pessoa(
@@ -437,7 +437,7 @@ class HomeView extends StatelessWidget {
       ),
       Pessoa(
         id: maeId,
-        nome: texto('7.1', 'Mãe não informada'),
+        nome: texto('9.1', 'Mãe não informada'),
         sexo: 'F',
         parentesco: 'mae',
         temCancer: diagnosticoMae.isNotEmpty && diagnosticoMae != 'Nenhum',
@@ -459,7 +459,7 @@ class HomeView extends StatelessWidget {
       ),
     ];
 
-    for (final blocoId in const ['4', '6', '8', '9']) {
+    for (final blocoId in const ['4', '6', '7', '8', '10', '11', '12']) {
       final registros = respostas[blocoId];
       if (registros is! List) continue;
 
@@ -490,18 +490,9 @@ class HomeView extends StatelessWidget {
         } else if (blocoId == '6') {
           if (parentesco.startsWith('Avô')) pessoas[0].paiId = id;
           if (parentesco.startsWith('Avó')) pessoas[0].maeId = id;
-        } else if (blocoId == '8') {
+        } else if (blocoId == '10') {
           if (parentesco.startsWith('Avô')) pessoas[1].paiId = id;
           if (parentesco.startsWith('Avó')) pessoas[1].maeId = id;
-        } else if (parentesco == 'Filho' || parentesco == 'Filha') {
-          if (sexoPaciente == 'M') {
-            pessoa.paiId = pacienteId;
-          } else {
-            pessoa.maeId = pacienteId;
-          }
-        } else if (parentesco == 'Cônjuge') {
-          pessoas[2].conjugeId = id;
-          pessoa.conjugeId = pacienteId;
         }
 
         pessoas.add(pessoa);

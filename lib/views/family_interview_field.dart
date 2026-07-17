@@ -94,6 +94,7 @@ class _FamiliarDialog extends StatefulWidget {
 class _FamiliarDialogState extends State<_FamiliarDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nome = TextEditingController();
+  final _genitores = TextEditingController();
   final _diagnostico = TextEditingController();
   final _nascimento = TextEditingController();
   final _conjuge = TextEditingController();
@@ -103,6 +104,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
   final _idadeObito = TextEditingController();
   final _causaObito = TextEditingController();
   final _observacoes = TextEditingController();
+  final _quantidadeFilhos = TextEditingController();
   String? _parentesco;
   String _genero = 'Não informado';
   String _testeGenetico = 'Desconhecido';
@@ -113,6 +115,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
   void dispose() {
     for (final controller in [
       _nome,
+      _genitores,
       _diagnostico,
       _nascimento,
       _conjuge,
@@ -122,6 +125,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
       _idadeObito,
       _causaObito,
       _observacoes,
+      _quantidadeFilhos,
     ]) {
       controller.dispose();
     }
@@ -147,6 +151,11 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
                   onChanged: (value) => setState(() => _parentesco = value),
                   validator: (value) =>
                       value == null ? 'Selecione o parentesco' : null,
+                ),
+                _campo(
+                  _genitores,
+                  'Nome dos genitores',
+                  hint: 'Quando aplicável',
                 ),
                 _campo(_nome, 'Nome completo ou iniciais'),
                 DropdownButtonFormField<String>(
@@ -178,6 +187,11 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
                 ),
                 _campo(_conjuge, 'Nome do(a) cônjuge'),
                 _campo(_relacao, 'Tipo de relação'),
+                _campo(
+                  _quantidadeFilhos,
+                  'Quantidade de filhos',
+                  numero: true,
+                ),
                 _campo(
                   _idadeDiagnostico,
                   'Idade no diagnóstico',
@@ -226,6 +240,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(context, {
       'parentesco': _parentesco,
+      'genitores': _genitores.text.trim(),
       'nome': _nome.text.trim(),
       'genero': _genero,
       'diagnostico': _diagnostico.text.trim(),
@@ -235,6 +250,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
       'adotado': _adotado,
       'conjuge': _conjuge.text.trim(),
       'relacao': _relacao.text.trim(),
+      'quantidadeFilhos': int.tryParse(_quantidadeFilhos.text),
       'idadeDiagnostico': int.tryParse(_idadeDiagnostico.text),
       'idadeAtual': int.tryParse(_idadeAtual.text),
       'idadeObito': int.tryParse(_idadeObito.text),

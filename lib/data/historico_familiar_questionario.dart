@@ -121,6 +121,25 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     tipo: TipoPergunta.texto,
   ),
   QuizPergunta(
+    id: '1.13',
+    secao: '1. Identificação do probando',
+    titulo: 'Quem é o(a) responsável legal?',
+    descricao: 'Preencha caso o(a) paciente seja menor de 18 anos.',
+    tipo: TipoPergunta.texto,
+  ),
+  QuizPergunta(
+    id: '1.14',
+    secao: '1. Identificação do probando',
+    titulo: 'Quantos irmãos ou meio-irmãos o(a) paciente tem?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
+    id: '1.15',
+    secao: '1. Identificação do probando',
+    titulo: 'Quantos primos o(a) paciente tem?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
     id: '2.1.1',
     secao: '2. Histórico reprodutivo e testes genéticos',
     titulo: 'Com que idade ocorreu a primeira menstruação (menarca)?',
@@ -205,8 +224,9 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
   QuizPergunta(
     id: '5.2',
     secao: '5. Linhagem paterna',
-    titulo: 'Qual é a idade atual do pai?',
-    tipo: TipoPergunta.numero,
+    titulo: 'Qual é a data de nascimento do pai?',
+    descricao: 'Informe no formato DD/MM/AAAA.',
+    tipo: TipoPergunta.data,
   ),
   QuizPergunta(
     id: '5.3',
@@ -264,13 +284,38 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
   QuizPergunta(
     id: '5.9',
     secao: '5. Linhagem paterna',
-    titulo: 'Algum dos tios paternos foi adotado?',
+    titulo: 'Quantos sobrinhos o pai tem?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
+    id: '5.10',
+    secao: '5. Linhagem paterna',
+    titulo: 'Algum dos irmãos do pai foi adotado?',
     tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '5.11',
+    secao: '5. Linhagem paterna',
+    titulo: 'Algum dos sobrinhos do pai foi adotado?',
+    tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '5.12',
+    secao: '5. Linhagem paterna',
+    titulo: 'Há casos de consanguinidade na família paterna?',
+    tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '5.13',
+    secao: '5. Linhagem paterna',
+    titulo: 'Se sim, qual é o casal e o parentesco?',
+    descricao: 'Informe os nomes do casal e o grau de parentesco.',
+    tipo: TipoPergunta.textoLongo,
   ),
   QuizPergunta(
     id: '6',
     secao: '6. Parentes por parte de pai',
-    titulo: 'Detalhe tios, primos e avós paternos',
+    titulo: 'Detalhe pais, avós, irmãos e tios da linhagem paterna',
     descricao:
         'Para cada pessoa, informe parentesco, nome/iniciais, diagnóstico, teste genético, '
         'gênero, nascimento, estado vital, adoção, cônjuge/relação, idade atual ou no '
@@ -281,39 +326,62 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
       'Avó Paterna',
       'Tio Paterno',
       'Tia Paterna',
-      'Primo Paterno',
-      'Prima Paterna',
+      'Bisavô Paterno',
+      'Bisavó Paterna',
     ],
   ),
   QuizPergunta(
-    id: '7.1',
-    secao: '7. Linhagem materna',
+    id: '7',
+    secao: '7. Primos do pai',
+    titulo: 'Detalhe os primos do pai',
+    descricao:
+        'Para cada pessoa, informe os genitores, parentesco, identificação, diagnóstico, '
+        'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
+        'filhos, causa da morte e observações.',
+    tipo: TipoPergunta.familiares,
+    opcoes: ['Primo do Pai', 'Prima do Pai'],
+  ),
+  QuizPergunta(
+    id: '8',
+    secao: '8. Sobrinhos do pai',
+    titulo: 'Detalhe os sobrinhos do pai (primos do probando)',
+    descricao:
+        'Para cada pessoa, informe os genitores, parentesco, identificação, diagnóstico, '
+        'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
+        'filhos, causa da morte e observações.',
+    tipo: TipoPergunta.familiares,
+    opcoes: ['Primo Paterno', 'Prima Paterna'],
+  ),
+  QuizPergunta(
+    id: '9.1',
+    secao: '9. Linhagem materna',
     titulo: 'Nome completo da mãe',
     tipo: TipoPergunta.texto,
   ),
   QuizPergunta(
-    id: '7.2',
-    secao: '7. Linhagem materna',
-    titulo: 'Qual é a idade atual da mãe?',
-    tipo: TipoPergunta.numero,
+    id: '9.2',
+    secao: '9. Linhagem materna',
+    titulo: 'Qual é a data de nascimento da mãe?',
+    descricao: 'Informe no formato DD/MM/AAAA.',
+    tipo: TipoPergunta.data,
   ),
   QuizPergunta(
-    id: '7.3',
-    secao: '7. Linhagem materna',
+    id: '9.3',
+    secao: '9. Linhagem materna',
     titulo: 'A mãe do probando está viva?',
     tipo: TipoPergunta.multiplaEscolha,
     opcoes: ['Viva', 'Falecida', 'Desconhecido'],
   ),
   QuizPergunta(
-    id: '7.4',
-    secao: '7. Linhagem materna',
+    id: '9.4',
+    secao: '9. Linhagem materna',
     titulo: 'Qual era a idade da mãe quando faleceu?',
     descricao: 'Preencha somente se a mãe for falecida.',
     tipo: TipoPergunta.numero,
   ),
   QuizPergunta(
-    id: '7.5',
-    secao: '7. Linhagem materna',
+    id: '9.5',
+    secao: '9. Linhagem materna',
     titulo: 'Qual foi a causa do óbito da mãe?',
     tipo: TipoPergunta.multiplaEscolha,
     opcoes: [
@@ -329,36 +397,79 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     ],
   ),
   QuizPergunta(
-    id: '7.6',
-    secao: '7. Linhagem materna',
+    id: '9.6',
+    secao: '9. Linhagem materna',
+    titulo: 'Com que idade a mãe teve a primeira menstruação (menarca)?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
+    id: '9.7',
+    secao: '9. Linhagem materna',
+    titulo: 'Com que idade a mãe teve o primeiro filho?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
+    id: '9.8',
+    secao: '9. Linhagem materna',
+    titulo: 'A mãe amamentou?',
+    tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '9.9',
+    secao: '9. Linhagem materna',
     titulo: 'A mãe tem histórico de câncer ou condição médica grave?',
     tipo: TipoPergunta.multiplaEscolha,
     opcoes: opcoesDiagnosticos,
   ),
   QuizPergunta(
-    id: '7.7',
-    secao: '7. Linhagem materna',
+    id: '9.10',
+    secao: '9. Linhagem materna',
     titulo: 'Quantas vezes a mãe engravidou?',
     descricao: 'Considere partos, natimortos e abortos.',
     tipo: TipoPergunta.numero,
   ),
   QuizPergunta(
-    id: '7.8',
-    secao: '7. Linhagem materna',
+    id: '9.11',
+    secao: '9. Linhagem materna',
     titulo: 'Quantos irmãos biológicos a mãe tem?',
     descricao: 'Informe o total de tios maternos.',
     tipo: TipoPergunta.numero,
   ),
   QuizPergunta(
-    id: '7.9',
-    secao: '7. Linhagem materna',
+    id: '9.12',
+    secao: '9. Linhagem materna',
     titulo: 'Algum dos tios maternos foi adotado?',
     tipo: TipoPergunta.simNaoDesconhecido,
   ),
   QuizPergunta(
-    id: '8',
-    secao: '8. Parentes por parte de mãe',
-    titulo: 'Detalhe tios, primos e avós maternos',
+    id: '9.13',
+    secao: '9. Linhagem materna',
+    titulo: 'Quantos sobrinhos a mãe tem?',
+    tipo: TipoPergunta.numero,
+  ),
+  QuizPergunta(
+    id: '9.14',
+    secao: '9. Linhagem materna',
+    titulo: 'Algum dos sobrinhos da mãe foi adotado?',
+    tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '9.15',
+    secao: '9. Linhagem materna',
+    titulo: 'Há casos de consanguinidade na família materna?',
+    tipo: TipoPergunta.simNaoDesconhecido,
+  ),
+  QuizPergunta(
+    id: '9.16',
+    secao: '9. Linhagem materna',
+    titulo: 'Se sim, qual é o casal e o parentesco?',
+    descricao: 'Informe os nomes do casal e o grau de parentesco.',
+    tipo: TipoPergunta.textoLongo,
+  ),
+  QuizPergunta(
+    id: '10',
+    secao: '10. Parentes por parte de mãe',
+    titulo: 'Detalhe pais, avós, irmãos e tios da linhagem materna',
     descricao:
         'Para cada pessoa, informe parentesco, nome/iniciais, diagnóstico, teste genético, '
         'gênero, nascimento, estado vital, adoção, cônjuge/relação, idade atual ou no '
@@ -369,24 +480,36 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
       'Avó Materna',
       'Tio Materno',
       'Tia Materna',
-      'Primo Materno',
-      'Prima Materna',
+      'Bisavô Materno',
+      'Bisavó Materna',
     ],
   ),
   QuizPergunta(
-    id: '9',
-    secao: '9. Mapeamento geral e adicional',
-    titulo: 'Registre outros parentes, cônjuges ou filhos relevantes',
+    id: '11',
+    secao: '11. Primos da mãe',
+    titulo: 'Detalhe os primos da mãe',
     descricao:
-        'Para cada pessoa, informe parentesco, nome/iniciais, diagnóstico, teste genético, '
-        'gênero, nascimento, estado vital, adoção, cônjuge/relação, idade atual ou no '
-        'diagnóstico/óbito, causa da morte e observações.',
+        'Para cada pessoa, informe os genitores, parentesco, identificação, diagnóstico, '
+        'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
+        'filhos, causa da morte e observações.',
     tipo: TipoPergunta.familiares,
-    opcoes: [
-      'Filho',
-      'Filha',
-      'Cônjuge',
-      'Outro parente',
-    ],
+    opcoes: ['Primo da Mãe', 'Prima da Mãe'],
+  ),
+  QuizPergunta(
+    id: '12',
+    secao: '12. Sobrinhos da mãe',
+    titulo: 'Detalhe os sobrinhos da mãe (primos do probando)',
+    descricao:
+        'Para cada pessoa, informe os genitores, parentesco, identificação, diagnóstico, '
+        'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
+        'filhos, causa da morte e observações.',
+    tipo: TipoPergunta.familiares,
+    opcoes: ['Primo Materno', 'Prima Materna'],
+  ),
+  QuizPergunta(
+    id: '13.1',
+    secao: '13. Impressões da entrevista',
+    titulo: 'Nome do(a) entrevistador(a)',
+    tipo: TipoPergunta.texto,
   ),
 ];
