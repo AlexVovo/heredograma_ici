@@ -11,6 +11,7 @@ class QuizPergunta {
   final TipoPergunta tipo;
   final List<String> opcoes;
   final bool obrigatoria;
+  final String? valorInicial;
 
   const QuizPergunta({
     required this.id,
@@ -20,6 +21,7 @@ class QuizPergunta {
     required this.tipo,
     this.opcoes = const [],
     this.obrigatoria = false,
+    this.valorInicial,
   });
 }
 
@@ -32,6 +34,7 @@ enum TipoPergunta {
   numero,
   data,
   familiares,
+  tumores,
 }
 
 class QuizResultado {
@@ -87,7 +90,9 @@ class _QuizViewState extends State<QuizView> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    _respostas = List<dynamic>.filled(widget.perguntas.length, null);
+    _respostas = [
+      for (final pergunta in widget.perguntas) pergunta.valorInicial,
+    ];
   }
 
   @override
@@ -401,6 +406,15 @@ class _QuizViewState extends State<QuizView> {
           parentescos: pergunta.opcoes,
           onChanged: (familiares) {
             setState(() => _respostas[index] = familiares);
+          },
+        );
+      case TipoPergunta.tumores:
+        return TumorInterviewField(
+          tumores: List<Map<String, dynamic>>.from(
+            _respostas[index] as List? ?? const [],
+          ),
+          onChanged: (tumores) {
+            setState(() => _respostas[index] = tumores);
           },
         );
     }

@@ -16,7 +16,7 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const BrandedAppBar(
-        title: 'HeredoOnco',
+        title: 'Visão geral',
         elevation: 0,
       ),
       body: LayoutBuilder(
@@ -418,7 +418,12 @@ class HomeView extends StatelessWidget {
     final pacienteId = '${baseId}_paciente';
     final paiId = '${baseId}_pai';
     final maeId = '${baseId}_mae';
-    final sexoPaciente = texto('1.4') == 'Feminino' ? 'F' : 'M';
+    final sexoPaciente = switch (texto('1.4')) {
+      'Masculino' => 'M',
+      'Feminino' => 'F',
+      'Intersexo' => 'I',
+      _ => 'N',
+    };
     final temCancerPaciente = texto('3.1') == 'Sim';
     final diagnosticoPai = texto('5.6');
     final diagnosticoMae = texto('9.9');
@@ -450,7 +455,11 @@ class HomeView extends StatelessWidget {
         id: pacienteId,
         nome: texto('1.1', texto('1.2', 'Paciente')),
         sexo: sexoPaciente,
-        parentesco: sexoPaciente == 'F' ? 'filha' : 'filho',
+        parentesco: switch (sexoPaciente) {
+          'M' => 'filho',
+          'F' => 'filha',
+          _ => 'filho(a)',
+        },
         temCancer: temCancerPaciente,
         tipoCancer: temCancerPaciente ? texto('3.2') : null,
         idadeDiagnostico: temCancerPaciente ? numero('3.3') : null,
@@ -488,11 +497,21 @@ class HomeView extends StatelessWidget {
           if (!parentesco.contains('Materno')) pessoa.paiId = paiId;
           if (!parentesco.contains('Paterno')) pessoa.maeId = maeId;
         } else if (blocoId == '6') {
-          if (parentesco.startsWith('Avô')) pessoas[0].paiId = id;
-          if (parentesco.startsWith('Avó')) pessoas[0].maeId = id;
+          if (parentesco.startsWith('Avô')) {
+            if (pessoa.sexo == 'F') {
+              pessoas[0].maeId = id;
+            } else {
+              pessoas[0].paiId = id;
+            }
+          }
         } else if (blocoId == '10') {
-          if (parentesco.startsWith('Avô')) pessoas[1].paiId = id;
-          if (parentesco.startsWith('Avó')) pessoas[1].maeId = id;
+          if (parentesco.startsWith('Avô')) {
+            if (pessoa.sexo == 'F') {
+              pessoas[1].maeId = id;
+            } else {
+              pessoas[1].paiId = id;
+            }
+          }
         }
 
         pessoas.add(pessoa);
@@ -517,6 +536,8 @@ class HomeView extends StatelessWidget {
   String _sexoFamiliar(String genero, String parentesco) {
     if (genero == 'Masculino') return 'M';
     if (genero == 'Feminino') return 'F';
+    if (genero == 'Intersexo') return 'I';
+    if (genero == 'Não informado') return 'N';
     final texto = parentesco.toLowerCase();
     return texto.contains('irmã') ||
             texto.contains('avó') ||
@@ -524,7 +545,13 @@ class HomeView extends StatelessWidget {
             texto.contains('prima') ||
             texto.contains('filha')
         ? 'F'
-        : 'M';
+        : texto.contains('irmão') ||
+                texto.contains('avô') ||
+                texto.contains('tio') ||
+                texto.contains('primo') ||
+                texto.contains('filho')
+            ? 'M'
+            : 'N';
   }
 
   int? _calcularIdade(String nascimento) {

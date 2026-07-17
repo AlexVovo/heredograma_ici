@@ -17,7 +17,25 @@ const opcoesDiagnosticos = [
   'Carcinoma de Córtex Adrenal',
   'Tumor Teratoide Rabdoide Atípico (ATRT)',
   'Nenhum',
-  'Outro (especificar na observação)',
+  'Outro (Especificar)',
+  'Desconhecido',
+];
+
+const opcoesCausaObito = [
+  'Câncer/Tumor Maligno',
+  'Síndrome Genética',
+  'Malformação Congênita',
+  'Doença Cardiovascular',
+  'Óbito ao Nascer',
+  'Acidente/Trauma',
+  'Causa Natural',
+  'Outra Doença Crônica',
+  'Covid',
+  'Edema pulmonar',
+  'Cirrose',
+  'Infarto',
+  'Outra (especificar)',
+  'Desconhecido',
 ];
 
 const perguntasHistoricoFamiliar = <QuizPergunta>[
@@ -192,10 +210,10 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
   QuizPergunta(
     id: '3.4',
     secao: '3. Histórico pessoal de câncer',
-    titulo: 'Detalhamento dos tumores',
+    titulo: 'Detalhamento dos tumores, caso houver',
     descricao:
         'Para cada tumor, informe tipo, local, idade no diagnóstico e observações.',
-    tipo: TipoPergunta.textoLongo,
+    tipo: TipoPergunta.tumores,
   ),
   QuizPergunta(
     id: '4',
@@ -207,12 +225,9 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'diagnóstico/óbito, causa da morte e observações. Dados aproximados são aceitos.',
     tipo: TipoPergunta.familiares,
     opcoes: [
-      'Irmão (Pleno)',
-      'Irmã (Plena)',
-      'Meio-irmão (Paterno)',
-      'Meio-irmão (Materno)',
-      'Meio-irmã (Paterna)',
-      'Meio-irmã (Materna)',
+      'Irmão(ã) (Pleno)',
+      'Meio-irmão(ã) (Paterno)',
+      'Meio-irmão(ã) (Materno)',
     ],
   ),
   QuizPergunta(
@@ -247,17 +262,7 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     secao: '5. Linhagem paterna',
     titulo: 'Qual foi a causa do óbito do pai?',
     tipo: TipoPergunta.multiplaEscolha,
-    opcoes: [
-      'Câncer/Tumor Maligno',
-      'Síndrome Genética',
-      'Malformação Congênita',
-      'Doença Cardiovascular',
-      'Óbito ao Nascer',
-      'Acidente/Trauma',
-      'Causa Natural',
-      'Outra Doença Crônica',
-      'Desconhecida',
-    ],
+    opcoes: opcoesCausaObito,
   ),
   QuizPergunta(
     id: '5.6',
@@ -322,12 +327,20 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'diagnóstico/óbito, causa da morte e observações. Dados aproximados são aceitos.',
     tipo: TipoPergunta.familiares,
     opcoes: [
-      'Avô Paterno',
-      'Avó Paterna',
-      'Tio Paterno',
-      'Tia Paterna',
-      'Bisavô Paterno',
-      'Bisavó Paterna',
+      'Pai',
+      'Mãe',
+      'Padrasto',
+      'Madrasta',
+      'Avô(ó) Paterno',
+      'Avô(ó) Materno',
+      'Tio(a) Paterno',
+      'Tio(a) Materno',
+      'Tio(a) da mãe',
+      'Tio(a) do pai',
+      'Irmão(ã) (Pleno)',
+      'Meio-irmão(ã) (Paterno)',
+      'Meio-irmão(ã) (Materno)',
+      'Desconhecido',
     ],
   ),
   QuizPergunta(
@@ -339,7 +352,7 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
         'filhos, causa da morte e observações.',
     tipo: TipoPergunta.familiares,
-    opcoes: ['Primo do Pai', 'Prima do Pai'],
+    opcoes: ['Primo(a) Paterno', 'Desconhecido'],
   ),
   QuizPergunta(
     id: '8',
@@ -350,7 +363,7 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
         'filhos, causa da morte e observações.',
     tipo: TipoPergunta.familiares,
-    opcoes: ['Primo Paterno', 'Prima Paterna'],
+    opcoes: ['Primo(a) Paterno', 'Desconhecido'],
   ),
   QuizPergunta(
     id: '9.1',
@@ -384,17 +397,7 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     secao: '9. Linhagem materna',
     titulo: 'Qual foi a causa do óbito da mãe?',
     tipo: TipoPergunta.multiplaEscolha,
-    opcoes: [
-      'Câncer/Tumor Maligno',
-      'Síndrome Genética',
-      'Malformação Congênita',
-      'Doença Cardiovascular',
-      'Óbito ao Nascer',
-      'Acidente/Trauma',
-      'Causa Natural',
-      'Outra Doença Crônica',
-      'Desconhecida',
-    ],
+    opcoes: opcoesCausaObito,
   ),
   QuizPergunta(
     id: '9.6',
@@ -476,12 +479,13 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'diagnóstico/óbito, causa da morte e observações. Dados aproximados são aceitos.',
     tipo: TipoPergunta.familiares,
     opcoes: [
-      'Avô Materno',
-      'Avó Materna',
-      'Tio Materno',
-      'Tia Materna',
-      'Bisavô Materno',
-      'Bisavó Materna',
+      'Avô(á) Materno',
+      'Avô(ó) Paterno',
+      'Tio(a) Materno',
+      'Tio(a) Paterno',
+      'Primo(a) Materno',
+      'Primo(a) Paterno',
+      'Desconhecido',
     ],
   ),
   QuizPergunta(
@@ -493,7 +497,7 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
         'filhos, causa da morte e observações.',
     tipo: TipoPergunta.familiares,
-    opcoes: ['Primo da Mãe', 'Prima da Mãe'],
+    opcoes: ['Primo(a) Materno', 'Desconhecido'],
   ),
   QuizPergunta(
     id: '12',
@@ -504,12 +508,13 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
         'teste genético, gênero, nascimento, idades, estado vital, adoção, relação, '
         'filhos, causa da morte e observações.',
     tipo: TipoPergunta.familiares,
-    opcoes: ['Primo Materno', 'Prima Materna'],
+    opcoes: ['Primo(a) Materno', 'Desconhecido'],
   ),
   QuizPergunta(
     id: '13.1',
     secao: '13. Impressões da entrevista',
     titulo: 'Nome do(a) entrevistador(a)',
     tipo: TipoPergunta.texto,
+    valorInicial: 'Beatriz Antonio de Melo do Nascimento',
   ),
 ];

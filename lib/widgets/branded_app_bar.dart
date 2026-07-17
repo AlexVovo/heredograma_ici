@@ -27,6 +27,7 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final effectiveForegroundColor = foregroundColor ?? Colors.white;
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final isDesktop = screenWidth >= 900;
     final isCompact = screenWidth < 600;
     final isVeryCompact = screenWidth < 360;
     final logoSize = isCompact ? 40.0 : 46.0;
@@ -76,34 +77,36 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
-      titleSpacing: isCompact ? 0 : 8,
+      titleSpacing: isDesktop ? 24 : (isCompact ? 0 : 8),
       title: Row(
         children: [
-          Container(
-            width: logoSize,
-            height: logoSize,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.8),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.14),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+          if (!isDesktop) ...[
+            Container(
+              width: logoSize,
+              height: logoSize,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  width: 1.5,
                 ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.14),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: const BrandLogo.compact(),
+              ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: const BrandLogo.compact(),
-            ),
-          ),
-          SizedBox(width: isCompact ? 8 : 12),
+            SizedBox(width: isCompact ? 8 : 12),
+          ],
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -121,7 +124,7 @@ class BrandedAppBar extends StatelessWidget implements PreferredSizeWidget {
                     letterSpacing: -0.25,
                   ),
                 ),
-                if (!isVeryCompact) ...[
+                if (!isDesktop && !isVeryCompact) ...[
                   const SizedBox(height: 3),
                   Text(
                     title == 'HeredoOnco'
