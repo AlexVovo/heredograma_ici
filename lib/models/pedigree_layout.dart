@@ -10,8 +10,9 @@ class PedigreePoint {
 class PedigreeSegment {
   final PedigreePoint start;
   final PedigreePoint end;
+  final bool adotivo;
 
-  const PedigreeSegment(this.start, this.end);
+  const PedigreeSegment(this.start, this.end, {this.adotivo = false});
 }
 
 class PedigreeLayout {
@@ -55,7 +56,12 @@ class PedigreeLayout {
       var changed = false;
       for (final child in people) {
         final childGeneration = generationById[child.id]!;
-        for (final parentId in [child.paiId, child.maeId]) {
+        for (final parentId in [
+          child.paiId,
+          child.maeId,
+          child.paiAdotivoId,
+          child.maeAdotivaId,
+        ]) {
           if (parentId == null || !byId.containsKey(parentId)) continue;
           final expected = childGeneration - 1;
           if (generationById[parentId] != expected) {
@@ -105,6 +111,7 @@ class PedigreeLayout {
   }
 
   static int _inferredGeneration(Pessoa person) {
+    if (person.geracao != null) return person.geracao!;
     final relationship = person.parentesco.toLowerCase();
     if (relationship.contains('bisav')) return -1;
     if (relationship.contains('avô') || relationship.contains('avó')) return 0;
@@ -118,6 +125,7 @@ class PedigreeLayout {
     if (relationship.contains('neto') || relationship.contains('neta')) {
       return 3;
     }
+    if (relationship.contains('sobrinh')) return 3;
     if (relationship.contains('filho') || relationship.contains('filha')) {
       return 2;
     }
@@ -181,14 +189,27 @@ class PedigreeLayout {
     }
 
     final families = <String, List<Pessoa>>{};
+    final adoptiveFamilies = <String, List<Pessoa>>{};
     for (final child in people) {
       final parents = [child.paiId, child.maeId]
           .whereType<String>()
           .where(positions.containsKey)
           .toList()
         ..sort();
-      if (parents.isEmpty) continue;
-      families.putIfAbsent(parents.join('|'), () => []).add(child);
+      if (parents.isNotEmpty) {
+        families.putIfAbsent(parents.join('|'), () => []).add(child);
+      }
+
+      final adoptiveParents = [child.paiAdotivoId, child.maeAdotivaId]
+          .whereType<String>()
+          .where(positions.containsKey)
+          .toList()
+        ..sort();
+      if (adoptiveParents.isNotEmpty) {
+        adoptiveFamilies
+            .putIfAbsent(adoptiveParents.join('|'), () => [])
+            .add(child);
+      }
     }
 
     if (inferredFather != null && inferredMother != null) {
@@ -210,30 +231,48 @@ class PedigreeLayout {
       }
     }
 
-    for (final entry in families.entries) {
-      final parentIds = entry.key.split('|');
-      final parentPoints = parentIds.map((id) => positions[id]!).toList();
-      final unionX = parentPoints.fold<double>(0, (sum, p) => sum + p.x) /
-          parentPoints.length;
-      final parentY = parentPoints.first.y;
-      final children = entry.value
-          .map((child) => positions[child.id])
-          .whereType<PedigreePoint>()
-          .toList();
-      if (children.isEmpty) continue;
-      final siblingY = children.first.y - 55;
-      final minX = children.fold<double>(
-          children.first.x, (min, p) => p.x < min ? p.x : min);
-      final maxX = children.fold<double>(
-          children.first.x, (max, p) => p.x > max ? p.x : max);
-      lines.add(PedigreeSegment(
-          PedigreePoint(unionX, parentY), PedigreePoint(unionX, siblingY)));
-      lines.add(PedigreeSegment(
-          PedigreePoint(minX, siblingY), PedigreePoint(maxX, siblingY)));
-      for (final child in children) {
-        lines.add(PedigreeSegment(PedigreePoint(child.x, siblingY), child));
+    void addFamilyLines(
+      Map<String, List<Pessoa>> source, {
+      bool adotivo = false,
+    }) {
+      for (final entry in source.entries) {
+        final parentIds = entry.key.split('|');
+        final parentPoints = parentIds.map((id) => positions[id]!).toList();
+        final unionX = parentPoints.fold<double>(0, (sum, p) => sum + p.x) /
+            parentPoints.length;
+        final parentY = parentPoints.first.y;
+        final children = entry.value
+            .map((child) => positions[child.id])
+            .whereType<PedigreePoint>()
+            .toList();
+        if (children.isEmpty) continue;
+        final siblingY = children.first.y - 55;
+        final minX = children.fold<double>(
+            children.first.x, (min, p) => p.x < min ? p.x : min);
+        final maxX = children.fold<double>(
+            children.first.x, (max, p) => p.x > max ? p.x : max);
+        lines.add(PedigreeSegment(
+          PedigreePoint(unionX, parentY),
+          PedigreePoint(unionX, siblingY),
+          adotivo: adotivo,
+        ));
+        lines.add(PedigreeSegment(
+          PedigreePoint(minX, siblingY),
+          PedigreePoint(maxX, siblingY),
+          adotivo: adotivo,
+        ));
+        for (final child in children) {
+          lines.add(PedigreeSegment(
+            PedigreePoint(child.x, siblingY),
+            child,
+            adotivo: adotivo,
+          ));
+        }
       }
     }
+
+    addFamilyLines(families);
+    addFamilyLines(adoptiveFamilies, adotivo: true);
     return lines;
   }
 }

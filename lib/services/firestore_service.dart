@@ -51,21 +51,9 @@ class FirestoreService {
         'pacienteNome': heredograma.pacienteNome,
         'pacienteIdade': heredograma.pacienteIdade,
         'pacienteSexo': heredograma.pacienteSexo,
+        'schemaVersion': 2,
         'entrevistaRespostas': heredograma.entrevistaRespostas,
-        'pessoas': heredograma.pessoas
-            .map((p) => {
-                  'id': p.id,
-                  'nome': p.nome,
-                  'sexo': p.sexo,
-                  'parentesco': p.parentesco,
-                  'temCancer': p.temCancer,
-                  'portador': p.portador,
-                  'tipoCancer': p.tipoCancer,
-                  'idadeDiagnostico': p.idadeDiagnostico,
-                  'paiId': p.paiId,
-                  'maeId': p.maeId,
-                })
-            .toList(),
+        'pessoas': heredograma.pessoas.map((p) => p.toJson()).toList(),
         'dataAtualizacao': FieldValue.serverTimestamp(),
       });
     } catch (e) {

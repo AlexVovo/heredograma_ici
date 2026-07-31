@@ -438,6 +438,9 @@ class HomeView extends StatelessWidget {
         tipoCancer: diagnosticoPai.isEmpty || diagnosticoPai == 'Nenhum'
             ? null
             : diagnosticoPai,
+        statusVital: _normalizarStatusVital(texto('5.3')),
+        idadeObito: numero('5.4'),
+        ladoFamiliar: 'Paterno',
         conjugeId: maeId,
       ),
       Pessoa(
@@ -449,6 +452,9 @@ class HomeView extends StatelessWidget {
         tipoCancer: diagnosticoMae.isEmpty || diagnosticoMae == 'Nenhum'
             ? null
             : diagnosticoMae,
+        statusVital: _normalizarStatusVital(texto('9.3')),
+        idadeObito: numero('9.4'),
+        ladoFamiliar: 'Materno',
         conjugeId: paiId,
       ),
       Pessoa(
@@ -463,6 +469,9 @@ class HomeView extends StatelessWidget {
         temCancer: temCancerPaciente,
         tipoCancer: temCancerPaciente ? texto('3.2') : null,
         idadeDiagnostico: temCancerPaciente ? numero('3.3') : null,
+        adocao: _adocaoProbando(texto('1.10'), texto('1.11')),
+        ladoFamiliar: 'Ambos',
+        probando: true,
         paiId: paiId,
         maeId: maeId,
       ),
@@ -477,6 +486,9 @@ class HomeView extends StatelessWidget {
         final parentesco =
             registro['parentesco']?.toString() ?? 'Outro parente';
         final diagnostico = registro['diagnostico']?.toString().trim() ?? '';
+        final categoria =
+            registro['categoriaDiagnostico']?.toString() ?? 'Desconhecido';
+        final temCancer = categoria == 'Câncer';
         final genero = registro['genero']?.toString() ?? '';
         final id = '${baseId}_${blocoId}_$i';
         final pessoa = Pessoa(
@@ -486,11 +498,19 @@ class HomeView extends StatelessWidget {
               : parentesco,
           sexo: _sexoFamiliar(genero, parentesco),
           parentesco: parentesco,
-          temCancer: diagnostico.isNotEmpty && diagnostico != 'Nenhum',
-          tipoCancer: diagnostico.isEmpty || diagnostico == 'Nenhum'
-              ? null
-              : diagnostico,
+          temCancer: temCancer,
+          tipoCancer: !temCancer || diagnostico.isEmpty ? null : diagnostico,
+          condicoesClinicas:
+              categoria == 'Outra condição clínica' && diagnostico.isNotEmpty
+                  ? [diagnostico]
+                  : const [],
           idadeDiagnostico: registro['idadeDiagnostico'] as int?,
+          statusVital:
+              _normalizarStatusVital(registro['statusVital']?.toString() ?? ''),
+          idadeObito: registro['idadeObito'] as int?,
+          adocao: registro['adotado']?.toString() ?? 'Desconhecido',
+          ladoFamiliar: _ladoFamiliar(parentesco, blocoId),
+          geracao: _geracaoEntrevista(parentesco, blocoId),
         );
 
         if (blocoId == '4') {
@@ -552,6 +572,52 @@ class HomeView extends StatelessWidget {
                 texto.contains('filho')
             ? 'M'
             : 'N';
+  }
+
+  String _normalizarStatusVital(String value) {
+    final normalizado = value.toLowerCase();
+    if (normalizado == 'vivo' || normalizado == 'viva') return 'Vivo';
+    if (normalizado == 'falecido' || normalizado == 'falecida') {
+      return 'Falecido';
+    }
+    return 'Desconhecido';
+  }
+
+  String _adocaoProbando(String adotado, String porFamiliar) {
+    if (adotado == 'Não') return 'Não';
+    if (adotado != 'Sim') return 'Desconhecido';
+    return porFamiliar == 'Sim'
+        ? 'Sim, de dentro da família'
+        : porFamiliar == 'Não'
+            ? 'Sim, de fora da família'
+            : 'Sim';
+  }
+
+  String _ladoFamiliar(String parentesco, String blocoId) {
+    final value = parentesco.toLowerCase();
+    if (value.contains('materno') ||
+        const ['10', '11', '12'].contains(blocoId)) {
+      return 'Materno';
+    }
+    if (value.contains('paterno') || const ['6', '7', '8'].contains(blocoId)) {
+      return 'Paterno';
+    }
+    if (blocoId == '4') return 'Ambos';
+    return 'Desconhecido';
+  }
+
+  int _geracaoEntrevista(String parentesco, String blocoId) {
+    final value = parentesco.toLowerCase();
+    if (value.contains('avô') || value.contains('avó')) return 0;
+    if (blocoId == '7' || blocoId == '11') return 1;
+    if (blocoId == '8' || blocoId == '12' || blocoId == '4') return 2;
+    if (value.contains('tio') ||
+        value == 'pai' ||
+        value == 'mãe' ||
+        value == 'mae') {
+      return 1;
+    }
+    return 2;
   }
 
   int? _calcularIdade(String nascimento) {

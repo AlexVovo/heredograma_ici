@@ -80,7 +80,8 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
       'Masculino',
       'Não binário',
       'Transgênero',
-      'Não informado'
+      'Não informado',
+      'Não se aplica (menor de 18 anos)',
     ],
   ),
   QuizPergunta(
@@ -160,9 +161,21 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
   QuizPergunta(
     id: '2.1.1',
     secao: '2. Histórico reprodutivo e testes genéticos',
-    titulo: 'Com que idade ocorreu a primeira menstruação (menarca)?',
-    descricao:
-        'Idade em anos. Preencher apenas para probandos do sexo feminino.',
+    titulo: 'A primeira menstruação (menarca) já ocorreu?',
+    descricao: 'Preencher apenas quando aplicável ao probando.',
+    tipo: TipoPergunta.multiplaEscolha,
+    opcoes: [
+      'Ocorreu',
+      'Ainda não ocorreu',
+      'Não se aplica',
+      'Desconhecido',
+    ],
+  ),
+  QuizPergunta(
+    id: '2.1.1a',
+    secao: '2. Histórico reprodutivo e testes genéticos',
+    titulo: 'Se ocorreu, com qual idade?',
+    descricao: 'Informe a idade em anos. Deixe em branco nos demais casos.',
     tipo: TipoPergunta.numero,
   ),
   QuizPergunta(
@@ -185,6 +198,14 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     descricao:
         'Ex.: exoma, painel de genes ou cariótipo. Anexe o laudo quando possível.',
     tipo: TipoPergunta.textoLongo,
+  ),
+  QuizPergunta(
+    id: '2.2.3',
+    secao: '2. Histórico reprodutivo e testes genéticos',
+    titulo: 'Anexe o laudo do teste genético',
+    descricao:
+        'No protótipo, utilize somente documentos fictícios ou anonimizados.',
+    tipo: TipoPergunta.arquivo,
   ),
   QuizPergunta(
     id: '3.1',

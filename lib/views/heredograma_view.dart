@@ -69,11 +69,13 @@ class _ClinicalPedigreePainter extends CustomPainter {
       ..strokeWidth = 1.8
       ..style = PaintingStyle.stroke;
     for (final line in layout.relationshipLines) {
-      canvas.drawLine(
-        Offset(line.start.x, line.start.y),
-        Offset(line.end.x, line.end.y),
-        linePaint,
-      );
+      final start = Offset(line.start.x, line.start.y);
+      final end = Offset(line.end.x, line.end.y);
+      if (line.adotivo) {
+        _drawDashedLine(canvas, start, end, linePaint);
+      } else {
+        canvas.drawLine(start, end, linePaint);
+      }
     }
 
     final rows = layout.positions.values
@@ -93,6 +95,27 @@ class _ClinicalPedigreePainter extends CustomPainter {
       _drawPerson(canvas, person, point, index + 1);
     }
     _drawLegend(canvas, size);
+  }
+
+  void _drawDashedLine(
+    Canvas canvas,
+    Offset start,
+    Offset end,
+    Paint paint,
+  ) {
+    final delta = end - start;
+    final length = delta.distance;
+    if (length == 0) return;
+    final direction = delta / length;
+    const dash = 7.0;
+    const gap = 5.0;
+    for (var distance = 0.0; distance < length; distance += dash + gap) {
+      canvas.drawLine(
+        start + direction * distance,
+        start + direction * math.min(distance + dash, length),
+        paint,
+      );
+    }
   }
 
   void _drawPerson(
@@ -128,6 +151,18 @@ class _ClinicalPedigreePainter extends CustomPainter {
       canvas.drawRect(rect, paint);
       canvas.drawRect(rect, border);
     }
+    if (_isAdopted(person)) {
+      final bracket = Path()
+        ..moveTo(rect.left - 7, rect.top)
+        ..lineTo(rect.left - 11, rect.top)
+        ..lineTo(rect.left - 11, rect.bottom)
+        ..lineTo(rect.left - 7, rect.bottom)
+        ..moveTo(rect.right + 7, rect.top)
+        ..lineTo(rect.right + 11, rect.top)
+        ..lineTo(rect.right + 11, rect.bottom)
+        ..lineTo(rect.right + 7, rect.bottom);
+      canvas.drawPath(bracket, border);
+    }
     _text(canvas, '$index', Offset(center.dx - symbolSize / 2, 0),
         y: center.dy - symbolSize / 2 - 18, size: 10);
     if (_isDeceased(person)) {
@@ -151,8 +186,11 @@ class _ClinicalPedigreePainter extends CustomPainter {
     final details = <String>[
       person.nome,
       if (person.tipoCancer?.trim().isNotEmpty == true) person.tipoCancer!,
+      ...person.condicoesClinicas,
       if (person.idadeDiagnostico != null)
         'Diagnóstico: ${person.idadeDiagnostico} anos',
+      if (person.falecido && person.idadeObito != null)
+        'Óbito: ${person.idadeObito} anos',
     ];
     for (var i = 0; i < details.length; i++) {
       _text(canvas, details[i], Offset(center.dx - 66, 0),
@@ -198,14 +236,19 @@ class _ClinicalPedigreePainter extends CustomPainter {
   }
 
   bool _isProband(Pessoa person) {
-    final value = person.parentesco.toLowerCase();
-    return value == 'filho' || value == 'filha' || value == 'filho(a)';
+    if (person.probando) return true;
+    return people.where((item) => item.probando).isEmpty &&
+        (person.parentesco.toLowerCase() == 'filho' ||
+            person.parentesco.toLowerCase() == 'filha' ||
+            person.parentesco.toLowerCase() == 'filho(a)');
   }
 
   bool _isDeceased(Pessoa person) {
-    // The compact Pessoa model does not yet persist vital status separately.
-    return false;
+    return person.falecido;
   }
+
+  bool _isAdopted(Pessoa person) =>
+      person.adocao.toLowerCase().startsWith('sim');
 
   void _text(
     Canvas canvas,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 
 import 'family_interview_field.dart';
+import 'laudo_attachment_field.dart';
 
 class QuizPergunta {
   final String id;
@@ -35,6 +36,7 @@ enum TipoPergunta {
   data,
   familiares,
   tumores,
+  arquivo,
 }
 
 class QuizResultado {
@@ -416,6 +418,13 @@ class _QuizViewState extends State<QuizView> {
           onChanged: (tumores) {
             setState(() => _respostas[index] = tumores);
           },
+        );
+      case TipoPergunta.arquivo:
+        return LaudoAttachmentField(
+          anexo: _respostas[index] is Map
+              ? Map<String, dynamic>.from(_respostas[index] as Map)
+              : null,
+          onChanged: (anexo) => setState(() => _respostas[index] = anexo),
         );
     }
   }

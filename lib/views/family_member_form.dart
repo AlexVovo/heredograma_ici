@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'package:uuid/uuid.dart';
 
+import '../models/pessoa_model.dart';
+
 class FamilyMemberForm extends StatefulWidget {
   final Function(Map<String, dynamic>) onSave;
+  final List<Pessoa> pessoasExistentes;
+  final Pessoa? pessoaInicial;
 
-  const FamilyMemberForm({super.key, required this.onSave});
+  const FamilyMemberForm({
+    super.key,
+    required this.onSave,
+    this.pessoasExistentes = const [],
+    this.pessoaInicial,
+  });
 
   @override
   State<FamilyMemberForm> createState() => _FamilyMemberFormState();
@@ -17,9 +26,18 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
   final nomeController = TextEditingController();
   final idadeController = TextEditingController();
   final idadeDiagController = TextEditingController();
+  final idadeObitoController = TextEditingController();
 
   String sexo = 'M';
   String parentesco = 'pai';
+  String statusVital = 'Desconhecido';
+  String adocao = 'Desconhecido';
+  String ladoFamiliar = 'Não aplicável';
+  String? paiId;
+  String? maeId;
+  String? paiAdotivoId;
+  String? maeAdotivaId;
+  String? conjugeId;
   bool temCancer = false;
   String? tipoCancer;
 
@@ -33,7 +51,12 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
     'tio',
     'tia',
     'filho',
-    'filha'
+    'filha',
+    'primo',
+    'prima',
+    'sobrinho',
+    'sobrinha',
+    'outro'
   ];
 
   final List<String> tiposCancer = [
@@ -45,10 +68,41 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
     'Outro'
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    final pessoa = widget.pessoaInicial;
+    if (pessoa == null) return;
+    nomeController.text = pessoa.nome;
+    idadeDiagController.text = pessoa.idadeDiagnostico?.toString() ?? '';
+    idadeObitoController.text = pessoa.idadeObito?.toString() ?? '';
+    sexo = pessoa.sexo;
+    parentesco = pessoa.parentesco;
+    statusVital = pessoa.statusVital;
+    adocao = pessoa.adocao;
+    ladoFamiliar = pessoa.ladoFamiliar;
+    temCancer = pessoa.temCancer;
+    tipoCancer = pessoa.tipoCancer;
+    paiId = pessoa.paiId;
+    maeId = pessoa.maeId;
+    paiAdotivoId = pessoa.paiAdotivoId;
+    maeAdotivaId = pessoa.maeAdotivaId;
+    conjugeId = pessoa.conjugeId;
+  }
+
+  @override
+  void dispose() {
+    nomeController.dispose();
+    idadeController.dispose();
+    idadeDiagController.dispose();
+    idadeObitoController.dispose();
+    super.dispose();
+  }
+
   void salvar() {
     if (_formKey.currentState!.validate()) {
       final membro = {
-        'id': const Uuid().v4(),
+        'id': widget.pessoaInicial?.id ?? const Uuid().v4(),
         'nome': nomeController.text,
         'sexo': sexo,
         'parentesco': parentesco,
@@ -57,6 +111,17 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
         'tipoCancer': tipoCancer,
         'idadeDiagnostico':
             temCancer ? int.tryParse(idadeDiagController.text) : null,
+        'statusVital': statusVital,
+        'idadeObito': statusVital == 'Falecido'
+            ? int.tryParse(idadeObitoController.text)
+            : null,
+        'adocao': adocao,
+        'ladoFamiliar': ladoFamiliar,
+        'paiId': paiId,
+        'maeId': maeId,
+        'paiAdotivoId': paiAdotivoId,
+        'maeAdotivaId': maeAdotivaId,
+        'conjugeId': conjugeId,
       };
 
       widget.onSave(membro);
@@ -96,6 +161,27 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
 
               const SizedBox(height: 12),
 
+              DropdownButtonFormField<String>(
+                initialValue: ladoFamiliar,
+                items: const [
+                  DropdownMenuItem(value: 'Materno', child: Text('Materno')),
+                  DropdownMenuItem(value: 'Paterno', child: Text('Paterno')),
+                  DropdownMenuItem(value: 'Ambos', child: Text('Ambos')),
+                  DropdownMenuItem(
+                    value: 'Não aplicável',
+                    child: Text('Não aplicável'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Desconhecido',
+                    child: Text('Desconhecido'),
+                  ),
+                ],
+                onChanged: (v) => setState(() => ladoFamiliar = v!),
+                decoration: const InputDecoration(labelText: 'Lado familiar'),
+              ),
+
+              const SizedBox(height: 12),
+
               // Sexo
               DropdownButtonFormField(
                 initialValue: sexo,
@@ -115,6 +201,89 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(labelText: 'Idade'),
               ),
+
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                initialValue: statusVital,
+                items: const [
+                  DropdownMenuItem(value: 'Vivo', child: Text('Vivo')),
+                  DropdownMenuItem(value: 'Falecido', child: Text('Falecido')),
+                  DropdownMenuItem(
+                    value: 'Desconhecido',
+                    child: Text('Desconhecido'),
+                  ),
+                ],
+                onChanged: (v) => setState(() => statusVital = v!),
+                decoration: const InputDecoration(labelText: 'Estado vital'),
+              ),
+
+              if (statusVital == 'Falecido') ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: idadeObitoController,
+                  keyboardType: TextInputType.number,
+                  decoration:
+                      const InputDecoration(labelText: 'Idade no óbito'),
+                ),
+              ],
+
+              const SizedBox(height: 12),
+
+              DropdownButtonFormField<String>(
+                initialValue: adocao,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Sim, de dentro da família',
+                    child: Text('Sim, de dentro da família'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Sim, de fora da família',
+                    child: Text('Sim, de fora da família'),
+                  ),
+                  DropdownMenuItem(value: 'Não', child: Text('Não')),
+                  DropdownMenuItem(
+                    value: 'Desconhecido',
+                    child: Text('Desconhecido'),
+                  ),
+                ],
+                onChanged: (v) => setState(() => adocao = v!),
+                decoration: const InputDecoration(labelText: 'Adotado?'),
+              ),
+
+              const SizedBox(height: 12),
+
+              _seletorPessoa(
+                label: 'Pai biológico',
+                value: paiId,
+                onChanged: (value) => setState(() => paiId = value),
+              ),
+              const SizedBox(height: 12),
+              _seletorPessoa(
+                label: 'Mãe biológica',
+                value: maeId,
+                onChanged: (value) => setState(() => maeId = value),
+              ),
+              const SizedBox(height: 12),
+              _seletorPessoa(
+                label: 'Cônjuge',
+                value: conjugeId,
+                onChanged: (value) => setState(() => conjugeId = value),
+              ),
+              if (adocao.startsWith('Sim')) ...[
+                const SizedBox(height: 12),
+                _seletorPessoa(
+                  label: 'Pai adotivo',
+                  value: paiAdotivoId,
+                  onChanged: (value) => setState(() => paiAdotivoId = value),
+                ),
+                const SizedBox(height: 12),
+                _seletorPessoa(
+                  label: 'Mãe adotiva',
+                  value: maeAdotivaId,
+                  onChanged: (value) => setState(() => maeAdotivaId = value),
+                ),
+              ],
 
               const SizedBox(height: 12),
 
@@ -157,6 +326,29 @@ class _FamilyMemberFormState extends State<FamilyMemberForm> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _seletorPessoa({
+    required String label,
+    required String? value,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return DropdownButtonFormField<String?>(
+      initialValue: value,
+      decoration: InputDecoration(labelText: label),
+      items: [
+        const DropdownMenuItem<String?>(
+          value: null,
+          child: Text('Não informado'),
+        ),
+        for (final pessoa in widget.pessoasExistentes)
+          DropdownMenuItem<String?>(
+            value: pessoa.id,
+            child: Text(pessoa.nome),
+          ),
+      ],
+      onChanged: onChanged,
     );
   }
 }

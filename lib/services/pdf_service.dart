@@ -148,6 +148,9 @@ class PdfService {
                           ..setLineWidth(1.2);
                         for (final line in layout.relationshipLines) {
                           canvas
+                            ..setLineDashPattern(
+                              line.adotivo ? const [4, 3] : const [],
+                            )
                             ..drawLine(
                               offsetX + line.start.x * scale,
                               diagramHeight - (offsetY + line.start.y * scale),
@@ -156,6 +159,7 @@ class PdfService {
                             )
                             ..strokePath();
                         }
+                        canvas.setLineDashPattern();
                       },
                     ),
                     ..._pessoasPdf(
@@ -226,6 +230,19 @@ class PdfService {
                             maxLines: 2,
                             style: const pw.TextStyle(fontSize: 6),
                           ),
+                        for (final condicao in pessoas[index].condicoesClinicas)
+                          pw.Text(
+                            condicao,
+                            textAlign: pw.TextAlign.center,
+                            maxLines: 2,
+                            style: const pw.TextStyle(fontSize: 6),
+                          ),
+                        if (pessoas[index].falecido &&
+                            pessoas[index].idadeObito != null)
+                          pw.Text(
+                            'Óbito: ${pessoas[index].idadeObito} anos',
+                            style: const pw.TextStyle(fontSize: 6),
+                          ),
                       ],
                     ),
                   ),
@@ -239,16 +256,42 @@ class PdfService {
   pw.Widget _simboloPdf(Pessoa pessoa, double size) {
     final shape =
         pessoa.sexo == 'F' ? pw.BoxShape.circle : pw.BoxShape.rectangle;
+    final simbolo = pw.Stack(
+      children: [
+        pw.Container(
+          width: size,
+          height: size,
+          decoration: pw.BoxDecoration(
+            shape: shape,
+            color: pessoa.temCancer
+                ? _corDiagnosticoPdf(pessoa.tipoCancer)
+                : PdfColors.white,
+            border: pw.Border.all(width: 1.2),
+          ),
+        ),
+        if (pessoa.falecido)
+          pw.CustomPaint(
+            size: PdfPoint(size, size),
+            painter: (canvas, point) {
+              canvas
+                ..setStrokeColor(PdfColors.black)
+                ..setLineWidth(1.2)
+                ..drawLine(0, 0, size, size)
+                ..strokePath();
+            },
+          ),
+      ],
+    );
+    if (!pessoa.adocao.toLowerCase().startsWith('sim')) return simbolo;
     return pw.Container(
-      width: size,
-      height: size,
-      decoration: pw.BoxDecoration(
-        shape: shape,
-        color: pessoa.temCancer
-            ? _corDiagnosticoPdf(pessoa.tipoCancer)
-            : PdfColors.white,
-        border: pw.Border.all(width: 1.2),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 4),
+      decoration: const pw.BoxDecoration(
+        border: pw.Border(
+          left: pw.BorderSide(width: 1),
+          right: pw.BorderSide(width: 1),
+        ),
       ),
+      child: simbolo,
     );
   }
 
@@ -408,6 +451,15 @@ class PdfService {
   }
 
   String _formatarResposta(dynamic resposta) {
+    if (resposta is Map &&
+        (resposta['firestoreDocId'] != null ||
+            resposta['storagePath'] != null)) {
+      final nome = resposta['nome']?.toString() ?? 'Arquivo';
+      final tamanho = resposta['tamanho'];
+      final tamanhoTexto =
+          tamanho is num ? ' (${(tamanho / 1024).toStringAsFixed(1)} KB)' : '';
+      return 'Laudo anexado: $nome$tamanhoTexto';
+    }
     if (resposta is! List) return resposta.toString();
     return resposta.map((item) {
       if (item is! Map) return item.toString();

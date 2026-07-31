@@ -173,6 +173,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
   String _testeGenetico = 'Desconhecido';
   String _statusVital = 'Desconhecido';
   String _adotado = 'Desconhecido';
+  String _categoriaDiagnostico = 'Nenhum';
 
   @override
   void initState() {
@@ -184,6 +185,11 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
     _testeGenetico = familiar['testeGenetico']?.toString() ?? _testeGenetico;
     _statusVital = familiar['statusVital']?.toString() ?? _statusVital;
     _adotado = familiar['adotado']?.toString() ?? _adotado;
+    _categoriaDiagnostico = familiar['categoriaDiagnostico']?.toString() ??
+        (familiar['diagnostico']?.toString().trim().isNotEmpty == true &&
+                familiar['diagnostico'] != 'Nenhum'
+            ? 'Outra condição clínica'
+            : 'Nenhum');
     _preencher(_nome, familiar['nome']);
     _preencher(_genitores, familiar['genitores']);
     _preencher(_diagnostico, familiar['diagnostico']);
@@ -256,11 +262,31 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
                   items: _opcoes(FamilyInterviewField._generos),
                   onChanged: (value) => setState(() => _genero = value!),
                 ),
-                _campoComSugestoes(
-                  _diagnostico,
-                  'Diagnóstico clínico/câncer',
-                  opcoesDiagnosticos,
+                DropdownButtonFormField<String>(
+                  initialValue: _categoriaDiagnostico,
+                  decoration:
+                      const InputDecoration(labelText: 'Tipo de diagnóstico'),
+                  items: _opcoes(const [
+                    'Nenhum',
+                    'Câncer',
+                    'Outra condição clínica',
+                    'Desconhecido',
+                  ]),
+                  onChanged: (value) =>
+                      setState(() => _categoriaDiagnostico = value!),
                 ),
+                if (_categoriaDiagnostico == 'Câncer')
+                  _campoComSugestoes(
+                    _diagnostico,
+                    'Diagnóstico oncológico',
+                    opcoesDiagnosticos,
+                  )
+                else if (_categoriaDiagnostico == 'Outra condição clínica')
+                  _campo(
+                    _diagnostico,
+                    'Condição clínica',
+                    hint: 'Ex.: autismo',
+                  ),
                 DropdownButtonFormField<String>(
                   initialValue: _testeGenetico,
                   decoration:
@@ -376,6 +402,7 @@ class _FamiliarDialogState extends State<_FamiliarDialog> {
       'nome': _nome.text.trim(),
       'genero': _genero,
       'diagnostico': _diagnostico.text.trim(),
+      'categoriaDiagnostico': _categoriaDiagnostico,
       'testeGenetico': _testeGenetico,
       'nascimento': _nascimento.text.trim(),
       'statusVital': _statusVital,

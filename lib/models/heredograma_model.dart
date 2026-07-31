@@ -34,22 +34,9 @@ class Heredograma {
       'pacienteNome': pacienteNome,
       'pacienteIdade': pacienteIdade,
       'pacienteSexo': pacienteSexo,
+      'schemaVersion': 2,
       'entrevistaRespostas': entrevistaRespostas,
-      'pessoas': pessoas
-          .map((p) => {
-                'id': p.id,
-                'nome': p.nome,
-                'sexo': p.sexo,
-                'parentesco': p.parentesco,
-                'temCancer': p.temCancer,
-                'portador': p.portador,
-                'tipoCancer': p.tipoCancer,
-                'idadeDiagnostico': p.idadeDiagnostico,
-                'paiId': p.paiId,
-                'maeId': p.maeId,
-                'conjugeId': p.conjugeId,
-              })
-          .toList(),
+      'pessoas': pessoas.map((p) => p.toJson()).toList(),
       'dataCriacao': dataCriacao,
       'dataAtualizacao': dataAtualizacao ?? FieldValue.serverTimestamp(),
     };
@@ -58,19 +45,8 @@ class Heredograma {
   // Converter de JSON do Firestore
   factory Heredograma.fromJson(String id, Map<String, dynamic> json) {
     final pessoasList = (json['pessoas'] as List<dynamic>?)
-            ?.map((p) => Pessoa(
-                  id: p['id'] ?? '',
-                  nome: p['nome'] ?? '',
-                  sexo: p['sexo'] ?? 'M',
-                  parentesco: p['parentesco'] ?? '',
-                  temCancer: p['temCancer'] ?? false,
-                  portador: p['portador'] ?? false,
-                  tipoCancer: p['tipoCancer'],
-                  idadeDiagnostico: p['idadeDiagnostico'],
-                  paiId: p['paiId'],
-                  maeId: p['maeId'],
-                  conjugeId: p['conjugeId'],
-                ))
+            ?.whereType<Map>()
+            .map((p) => Pessoa.fromJson(Map<String, dynamic>.from(p)))
             .toList() ??
         [];
 

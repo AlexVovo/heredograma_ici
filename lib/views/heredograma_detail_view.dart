@@ -6,6 +6,7 @@ import 'package:heredograma_ici/services/pdf_service.dart';
 import 'package:heredograma_ici/widgets/branded_app_bar.dart';
 import 'family_member_form.dart';
 import 'heredograma_view.dart';
+import 'laudo_attachment_field.dart';
 
 class HeredogramaDetailView extends StatefulWidget {
   final Heredograma heredograma;
@@ -29,6 +30,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
   late bool _isEditing;
   late String _pacienteSexo;
   late List<Pessoa> _pessoas;
+  late Map<String, dynamic> _entrevistaRespostas;
   final _service = FirestoreService();
   final _pdfService = PdfService();
 
@@ -47,6 +49,8 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
         text: widget.heredograma.pacienteIdade?.toString() ?? '');
     _pacienteSexo = widget.heredograma.pacienteSexo ?? 'M';
     _pessoas = List<Pessoa>.from(widget.heredograma.pessoas);
+    _entrevistaRespostas =
+        Map<String, dynamic>.from(widget.heredograma.entrevistaRespostas);
   }
 
   @override
@@ -67,6 +71,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
         pacienteNome: _pacienteNomeController.text,
         pacienteIdade: int.tryParse(_pacienteIdadeController.text),
         pacienteSexo: _pacienteSexo,
+        entrevistaRespostas: _entrevistaRespostas,
       );
 
       if (_isNew) {
@@ -103,6 +108,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
       MaterialPageRoute(
         builder: (_) => FamilyMemberForm(
           onSave: (membro) {},
+          pessoasExistentes: _pessoas,
         ),
       ),
     );
@@ -120,9 +126,57 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
           portador: false,
           tipoCancer: membro['tipoCancer'] as String?,
           idadeDiagnostico: membro['idadeDiagnostico'] as int?,
+          statusVital: membro['statusVital'] as String? ?? 'Desconhecido',
+          idadeObito: membro['idadeObito'] as int?,
+          adocao: membro['adocao'] as String? ?? 'Desconhecido',
+          ladoFamiliar: membro['ladoFamiliar'] as String? ?? 'Não aplicável',
+          paiId: membro['paiId'] as String?,
+          maeId: membro['maeId'] as String?,
+          paiAdotivoId: membro['paiAdotivoId'] as String?,
+          maeAdotivaId: membro['maeAdotivaId'] as String?,
+          conjugeId: membro['conjugeId'] as String?,
         ),
       );
     });
+  }
+
+  Future<void> _editarFamiliar(int index) async {
+    final atual = _pessoas[index];
+    final membro = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FamilyMemberForm(
+          onSave: (membro) {},
+          pessoasExistentes:
+              _pessoas.where((pessoa) => pessoa.id != atual.id).toList(),
+          pessoaInicial: atual,
+        ),
+      ),
+    );
+    if (membro == null || !mounted) return;
+    setState(() => _pessoas[index] = _pessoaDoFormulario(membro));
+  }
+
+  Pessoa _pessoaDoFormulario(Map<String, dynamic> membro) {
+    return Pessoa(
+      id: membro['id'] as String,
+      nome: membro['nome'] as String,
+      sexo: membro['sexo'] as String,
+      parentesco: membro['parentesco'] as String,
+      temCancer: membro['temCancer'] as bool,
+      portador: false,
+      tipoCancer: membro['tipoCancer'] as String?,
+      idadeDiagnostico: membro['idadeDiagnostico'] as int?,
+      statusVital: membro['statusVital'] as String? ?? 'Desconhecido',
+      idadeObito: membro['idadeObito'] as int?,
+      adocao: membro['adocao'] as String? ?? 'Desconhecido',
+      ladoFamiliar: membro['ladoFamiliar'] as String? ?? 'Não aplicável',
+      paiId: membro['paiId'] as String?,
+      maeId: membro['maeId'] as String?,
+      paiAdotivoId: membro['paiAdotivoId'] as String?,
+      maeAdotivaId: membro['maeAdotivaId'] as String?,
+      conjugeId: membro['conjugeId'] as String?,
+    );
   }
 
   @override
@@ -233,6 +287,32 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
             ),
             const SizedBox(height: 24),
 
+            if (_isEditing || _entrevistaRespostas['2.2.3'] is Map) ...[
+              _buildSection(
+                title: 'Laudo genético',
+                children: [
+                  LaudoAttachmentField(
+                    anexo: _entrevistaRespostas['2.2.3'] is Map
+                        ? Map<String, dynamic>.from(
+                            _entrevistaRespostas['2.2.3'] as Map,
+                          )
+                        : null,
+                    enabled: _isEditing,
+                    onChanged: (anexo) {
+                      setState(() {
+                        if (anexo == null) {
+                          _entrevistaRespostas.remove('2.2.3');
+                        } else {
+                          _entrevistaRespostas['2.2.3'] = anexo;
+                        }
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Seção de Familiares
             _buildSection(
               title: 'Familiares (${_pessoas.length})',
@@ -310,9 +390,34 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
                                           ),
                                         ),
                                       ),
+                                    for (final condicao
+                                        in pessoa.condicoesClinicas)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Text(
+                                          condicao,
+                                          style: const TextStyle(fontSize: 11),
+                                        ),
+                                      ),
+                                    if (pessoa.falecido)
+                                      Text(
+                                        pessoa.idadeObito == null
+                                            ? 'Falecido'
+                                            : 'Falecido aos ${pessoa.idadeObito} anos',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
+                              if (_isEditing)
+                                IconButton(
+                                  tooltip: 'Editar familiar',
+                                  onPressed: () => _editarFamiliar(index),
+                                  icon: const Icon(Icons.edit_outlined),
+                                ),
                             ],
                           ),
                         );
@@ -388,6 +493,7 @@ class _HeredogramaDetailViewState extends State<HeredogramaDetailView> {
       pacienteNome: _pacienteNomeController.text,
       pacienteIdade: int.tryParse(_pacienteIdadeController.text),
       pacienteSexo: _pacienteSexo,
+      entrevistaRespostas: _entrevistaRespostas,
     );
 
     try {
