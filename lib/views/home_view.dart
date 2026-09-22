@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:heredograma_ici/data/historico_familiar_questionario.dart';
+import 'package:heredograma_ici/models/diagnostico_familiar.dart';
 import 'package:heredograma_ici/models/heredograma_model.dart';
 import 'package:heredograma_ici/models/pessoa_model.dart';
 import 'package:heredograma_ici/services/firestore_service.dart';
@@ -425,8 +426,14 @@ class HomeView extends StatelessWidget {
       _ => 'N',
     };
     final temCancerPaciente = texto('3.1') == 'Sim';
-    final diagnosticoPai = texto('5.6');
-    final diagnosticoMae = texto('9.9');
+    final diagnosticoPai = DiagnosticoFamiliar.fromResposta(
+      categoria: texto('5.6'),
+      detalhe: texto('5.6a'),
+    );
+    final diagnosticoMae = DiagnosticoFamiliar.fromResposta(
+      categoria: texto('9.9'),
+      detalhe: texto('9.9a'),
+    );
 
     final pessoas = [
       Pessoa(
@@ -434,10 +441,9 @@ class HomeView extends StatelessWidget {
         nome: texto('5.1', 'Pai não informado'),
         sexo: 'M',
         parentesco: 'pai',
-        temCancer: diagnosticoPai.isNotEmpty && diagnosticoPai != 'Nenhum',
-        tipoCancer: diagnosticoPai.isEmpty || diagnosticoPai == 'Nenhum'
-            ? null
-            : diagnosticoPai,
+        temCancer: diagnosticoPai.temCancer,
+        tipoCancer: diagnosticoPai.tipoCancer,
+        condicoesClinicas: diagnosticoPai.condicoesClinicas,
         statusVital: _normalizarStatusVital(texto('5.3')),
         idadeObito: numero('5.4'),
         ladoFamiliar: 'Paterno',
@@ -448,10 +454,9 @@ class HomeView extends StatelessWidget {
         nome: texto('9.1', 'Mãe não informada'),
         sexo: 'F',
         parentesco: 'mae',
-        temCancer: diagnosticoMae.isNotEmpty && diagnosticoMae != 'Nenhum',
-        tipoCancer: diagnosticoMae.isEmpty || diagnosticoMae == 'Nenhum'
-            ? null
-            : diagnosticoMae,
+        temCancer: diagnosticoMae.temCancer,
+        tipoCancer: diagnosticoMae.tipoCancer,
+        condicoesClinicas: diagnosticoMae.condicoesClinicas,
         statusVital: _normalizarStatusVital(texto('9.3')),
         idadeObito: numero('9.4'),
         ladoFamiliar: 'Materno',

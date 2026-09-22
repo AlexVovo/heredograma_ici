@@ -290,7 +290,20 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     secao: '5. Linhagem paterna',
     titulo: 'O pai tem histórico de câncer ou condição médica grave?',
     tipo: TipoPergunta.multiplaEscolha,
-    opcoes: opcoesDiagnosticos,
+    opcoes: [
+      'Nenhum',
+      'Câncer',
+      'Outra condição clínica',
+      'Desconhecido',
+    ],
+  ),
+  QuizPergunta(
+    id: '5.6a',
+    secao: '5. Linhagem paterna',
+    titulo: 'Qual é o diagnóstico do pai?',
+    descricao:
+        'Informe o tipo de câncer ou a condição clínica. Ex.: leucemia ou autismo.',
+    tipo: TipoPergunta.texto,
   ),
   QuizPergunta(
     id: '5.7',
@@ -443,7 +456,20 @@ const perguntasHistoricoFamiliar = <QuizPergunta>[
     secao: '9. Linhagem materna',
     titulo: 'A mãe tem histórico de câncer ou condição médica grave?',
     tipo: TipoPergunta.multiplaEscolha,
-    opcoes: opcoesDiagnosticos,
+    opcoes: [
+      'Nenhum',
+      'Câncer',
+      'Outra condição clínica',
+      'Desconhecido',
+    ],
+  ),
+  QuizPergunta(
+    id: '9.9a',
+    secao: '9. Linhagem materna',
+    titulo: 'Qual é o diagnóstico da mãe?',
+    descricao:
+        'Informe o tipo de câncer ou a condição clínica. Ex.: câncer de mama ou autismo.',
+    tipo: TipoPergunta.texto,
   ),
   QuizPergunta(
     id: '9.10',
